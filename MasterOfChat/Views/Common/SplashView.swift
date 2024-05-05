@@ -10,13 +10,15 @@ import SwiftUI
 
 struct SplashView: View {
     // MARK: - Property
-    @State private var isActive: Bool = false
+    @State private var isActive: Bool = true
     @State private var size: Double = 0.5
     @State private var opacity: Double = 0.5
     
     var body: some View {
         if isActive {
-            MainView()
+            NavigationStack {
+                MainView()
+            }
         } else {
             VStack(spacing: 20) {
                 Image("bird")
@@ -46,5 +48,7 @@ struct SplashView: View {
 }
 
 #Preview {
-    SplashView()
+    NavigationView {
+        SplashView()
+    }
 }

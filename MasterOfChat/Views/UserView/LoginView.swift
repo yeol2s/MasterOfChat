@@ -52,7 +52,7 @@ struct LoginView: View {
                         Text("로그인")
                     }
                     .frame(width: 100, height: 50)
-                    .background(Color.green.opacity(0.5).cornerRadius(10).shadow(radius: 2))
+                    .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
                     .foregroundColor(.white)
                     .font(.title.bold())
                     
@@ -62,7 +62,7 @@ struct LoginView: View {
                         Text("취소")
                     }
                     .frame(width: 100, height: 50)
-                    .background(Color.green.opacity(0.2).cornerRadius(10).shadow(radius: 2))
+                    .background(Color("LoginButtonColor").opacity(0.2).cornerRadius(10).shadow(radius: 2))
                     .foregroundColor(.white)
                     .font(.title.bold())
 
