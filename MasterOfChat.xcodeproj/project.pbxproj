@@ -13,6 +13,7 @@
 		965B49892BE2B84200C7C4C1 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 965B49882BE2B84200C7C4C1 /* Preview Assets.xcassets */; };
 		967F74172BE352F100206094 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967F74162BE352F100206094 /* SplashView.swift */; };
 		967F741A2BE3582700206094 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967F74192BE3582700206094 /* MainView.swift */; };
+		968ACB3D2BE98C4500B30E21 /* UserViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968ACB3C2BE98C4500B30E21 /* UserViewModel.swift */; };
 		96D8E0452BE483BF00828622 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 96D8E0442BE483BE00828622 /* GoogleService-Info.plist */; };
 		96D8E0A22BE4972B00828622 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 96D8E0A12BE4972B00828622 /* FirebaseAuth */; };
 		96D8E0A42BE4972B00828622 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 96D8E0A32BE4972B00828622 /* FirebaseAuthCombine-Community */; };
@@ -40,6 +41,7 @@
 		965B49882BE2B84200C7C4C1 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		967F74162BE352F100206094 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
 		967F74192BE3582700206094 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		968ACB3C2BE98C4500B30E21 /* UserViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserViewModel.swift; sourceTree = "<group>"; };
 		96D8E0442BE483BE00828622 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		96D8E0BF2BE4ACF100828622 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		96D8E0C22BE4AF0000828622 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 		967F74122BE351AA00206094 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				968ACB3C2BE98C4500B30E21 /* UserViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -261,6 +264,7 @@
 				965B49822BE2B84100C7C4C1 /* MasterOfChatApp.swift in Sources */,
 				96D8E0C32BE4AF0000828622 /* RegisterView.swift in Sources */,
 				96D8E0C02BE4ACF100828622 /* LoginView.swift in Sources */,
+				968ACB3D2BE98C4500B30E21 /* UserViewModel.swift in Sources */,
 				967F74172BE352F100206094 /* SplashView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

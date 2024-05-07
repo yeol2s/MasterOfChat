@@ -27,12 +27,10 @@ struct MainView: View {
             .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
             .background(Color("ChatRoomColor"))
             
-            
-            // MARK: 텍스트에디터 라인 크기 동적으로 움직이게 구현하기
-            // TODO: 해결못함 (지오매트리? 스크롤뷰?)
             HStack {
                 TextEditor(text: $textChat)
-                    .frame(minHeight: 50, maxHeight: 100)
+                    .frame(minHeight: 50, maxHeight: 150)
+                    .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/) // 텍스트에디터 높이 동적 크기 조절
                     .background(Color.clear)
                     .border(Color.gray, width: 1)
                     .padding(5)
@@ -49,6 +47,7 @@ struct MainView: View {
         .navigationBarTitle("채팅방", displayMode: .inline)
     }
 }
+
 
 #Preview {
     NavigationView {

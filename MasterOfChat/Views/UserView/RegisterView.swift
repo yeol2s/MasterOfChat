@@ -9,6 +9,8 @@
 import SwiftUI
 
 struct RegisterView: View {
+  
+    // MARK: - Property
     
     // MARK: - 뷰모델에 넣어서 컨펌확인까지 구현하자.
     @State private var registerID: String = ""

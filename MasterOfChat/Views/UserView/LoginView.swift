@@ -10,9 +10,15 @@ import SwiftUI
 
 struct LoginView: View {
     
-    @State var textID: String = ""
+    // MARK: - Property
+    // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
+    @StateObject var vm = UserViewModel()
     
+//    @State var textID: String = ""
+    
+    // MARK: - View
     var body: some View {
+        
         ZStack { // 전체 백그라운드 적용을 위한 ZStack
             
             Color("LoginColor").ignoresSafeArea()
@@ -26,9 +32,15 @@ struct LoginView: View {
                         .font(.title)
                         .frame(width:60, height: 40)
                     
-                    TextField("이메일 형식의 아이디를 입력하세요", text: $textID)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.headline)
+                    // (Binding) 사용자 정의 바인딩
+                    TextField("이메일 형식의 아이디를 입력하세요", text: Binding(
+                        get: { vm.loginID ?? ""},
+                        set: { vm.loginID = $0.isEmpty ? nil : $0}))
+                    .textFieldStyle(.roundedBorder)
+                    .font(.headline)
+                    .onReceive(vm.$loginID) { id in
+                        vm.inputStatus(loginID: id ?? "")
+                    }
                 } //:HSTACK
                 .padding(.bottom)
                 
@@ -37,8 +49,15 @@ struct LoginView: View {
                         .font(.title)
                         .frame(width:60, height: 40)
                     
-                    SecureField("패스워드를 입력하세요", text: $textID)
+                    SecureField("패스워드를 입력하세요", text: Binding(
+                        get: { vm.loginPW ?? ""},
+                        set: { vm.loginPW = $0.isEmpty ? nil : $0}))
                         .textFieldStyle(.roundedBorder)
+                    // 텍스트필드 입력마다 호출
+                        .onReceive(vm.$loginPW) { passWord in
+                            // id, pw 입력 되었는지 확인 메서드 호출
+                            vm.inputStatus(loginPW: passWord ?? "")
+                        }
                 } //:HSTACK
                 .padding(.bottom)
                 
@@ -55,9 +74,12 @@ struct LoginView: View {
                     .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
                     .foregroundColor(.white)
                     .font(.title.bold())
+                    .disabled(!vm.isInputValid)
+                    
                     
                     Button {
                         // TODO: Login cancel logic
+                        
                     } label: {
                         Text("취소")
                     }
@@ -65,7 +87,7 @@ struct LoginView: View {
                     .background(Color("LoginButtonColor").opacity(0.2).cornerRadius(10).shadow(radius: 2))
                     .foregroundColor(.white)
                     .font(.title.bold())
-
+                    
                     
                 } //:HSTACK
                 Spacer()
@@ -81,7 +103,7 @@ struct LoginView: View {
                         .fontWeight(.bold)
                         .foregroundStyle(.blue)
                         .onTapGesture {
-                        // TODO: onTabGesture(ResiterView)
+                            // TODO: onTabGesture(ResiterView)
                             
                         }
                 } //:VSTACK

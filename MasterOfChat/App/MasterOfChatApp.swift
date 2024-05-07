@@ -21,7 +21,8 @@ struct MasterOfChatApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SplashView()
+            //SplashView()
+            LoginView()
         }
     }
 }

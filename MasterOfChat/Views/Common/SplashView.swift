@@ -10,7 +10,7 @@ import SwiftUI
 
 struct SplashView: View {
     // MARK: - Property
-    @State private var isActive: Bool = true
+    @State private var isActive: Bool = false
     @State private var size: Double = 0.5
     @State private var opacity: Double = 0.5
     
