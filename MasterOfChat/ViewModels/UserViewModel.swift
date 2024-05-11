@@ -17,6 +17,7 @@ enum LoginError: Error {
     case authError
 }
 
+
 final class UserViewModel: ObservableObject {
     
     // MARK: - Property
@@ -25,10 +26,12 @@ final class UserViewModel: ObservableObject {
     @Published var loginPW: String?
     @Published var isInputValid: Bool = false
     
+    @Published var showAlert: Bool = false
+    
     // 회원가입
-    @Published var registerID: String?
-    @Published var registerPW: String?
-    @Published var confirmPW: String?
+//    @Published var registerID: String?
+//    @Published var registerPW: String?
+//    @Published var confirmPW: String?
     
     // MARK: - init
     
@@ -38,11 +41,16 @@ final class UserViewModel: ObservableObject {
     // (FireBase)로그인
     // 컴플리션핸들러처리 -> Auth.signIn 클로저의 결과처리를 Result로 뷰에서 참조하기 위해(힙 영역 보냄)
     func login(completion: @escaping (Result<Void, LoginError>) -> Void) {
-        // TODO: 이메일 형식아닐시 에러처리 및 Alert 필요
         if let id = loginID, let pw = loginPW {
+            // 이메일 형식 확인
+            guard isValidEmail(id) else {
+                completion(.failure(.notEmailFormat))
+                return }
             // FireBase 로그인 결과를 받아와서 클로저 처리
-            Auth.auth().signIn(withEmail: id, password: pw) { authResult, error in
+            Auth.auth().signIn(withEmail: id, password: pw) { [weak self] authResult, error in
+                guard let _ = self else { return }
                 if let error = error {
+                    print(error.localizedDescription)
                     completion(.failure(.authError))
                 } else {
                     completion(.success(()))
@@ -75,6 +83,20 @@ final class UserViewModel: ObservableObject {
         } else {
             isInputValid = false
             print("false")
+        }
+    }
+    
+    // 이메일 유효성 확인
+    private func isValidEmail(_ email: String) -> Bool {
+        // 이메일 주소 정규표현식
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        
+        do {
+            let regex = try NSRegularExpression(pattern: emailRegex)
+            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
+            return !matches.isEmpty
+        } catch {
+            return false
         }
     }
 }

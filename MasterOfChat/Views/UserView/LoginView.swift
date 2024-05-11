@@ -14,8 +14,8 @@ struct LoginView: View {
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
     @StateObject var vm = UserViewModel()
     
-    //    @State var textID: String = ""
-    
+    @State var alertType: LoginError? = nil
+
     // MARK: - View
     var body: some View {
         
@@ -72,11 +72,22 @@ struct LoginView: View {
                             case .success:
                                 print("성공")
                             case .failure(let error):
-                                print("실패: \(error.localizedDescription)")
+                                self.alertType = error
+                                vm.showAlert.toggle()
+                                switch error {
+                                case .authError:
+                                    print("인증에러")
+                                case .notEmailFormat:
+                                    print("이메일 형식 아님)")
+                                }
                             }
                         }
                     } label: {
                         Text("로그인")
+                    }
+                    .alert(isPresented: $vm.showAlert) {
+                        // TODO: Alert 'check' Logic
+                        getAlert()
                     }
                     .frame(width: 100, height: 50)
                     .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
@@ -118,8 +129,29 @@ struct LoginView: View {
                 
             } //:VSTACK
             .padding()
-            
         } //:ZSTACK
+    }
+    
+    // MARK: - Function
+    
+    private func getAlert() -> Alert {
+        let title = "오류"
+        var message = ""
+        
+        switch alertType {
+        case .authError:
+            message = "인증되지 않은 사용자입니다."
+        case .notEmailFormat:
+            message = "이메일 형식으로 로그인해 주세요"
+        case .none:
+            message = "알 수 없는 오류"
+        }
+        
+        return Alert(
+            title: Text(title),
+            message: Text(message),
+            dismissButton: .default(Text("확인"))
+        )
     }
 }
 
