@@ -67,8 +67,6 @@ struct RegisterView: View {
                 Text("회원 가입")
             }
             .padding(.top, 30)
-
-            
         } //:VSTACK
         .padding(5)
         Spacer()

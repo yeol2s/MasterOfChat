@@ -12,124 +12,119 @@ struct LoginView: View {
     
     // MARK: - Property
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
-    @StateObject var vm = UserViewModel()
+    @StateObject var vm = UserAuthViewModel()
+    
+    @ObservedObject var mainVm: MainViewModel // 메인뷰모델
     
     @State var alertType: LoginError? = nil
-
+    
     // MARK: - View
     var body: some View {
-        
-        ZStack { // 전체 백그라운드 적용을 위한 ZStack
-            
-            Color("LoginColor").ignoresSafeArea()
-            
-            VStack(alignment: .center) {
-                
-                Spacer()
-                
-                HStack() {
-                    Text("ID")
-                        .font(.title)
-                        .frame(width:60, height: 40)
+        NavigationView {
+            ZStack { // 전체 백그라운드 적용을 위한 ZStack
+                Color("LoginColor").ignoresSafeArea()
+                VStack(alignment: .center) {
                     
-                    // (Binding) 사용자 정의 바인딩
-                    TextField("이메일 형식의 아이디를 입력하세요", text: Binding(
-                        get: { vm.loginID ?? ""},
-                        set: { vm.loginID = $0.isEmpty ? nil : $0}))
-                    .textFieldStyle(.roundedBorder)
-                    .font(.headline)
-                    .onReceive(vm.$loginID) { id in
-                        vm.inputStatus(loginID: id ?? "")
-                    }
-                } //:HSTACK
-                .padding(.bottom)
-                
-                HStack {
-                    Text("암호")
-                        .font(.title)
-                        .frame(width:60, height: 40)
+                    Spacer()
                     
-                    SecureField("패스워드를 입력하세요", text: Binding(
-                        get: { vm.loginPW ?? ""},
-                        set: { vm.loginPW = $0.isEmpty ? nil : $0}))
-                    .textFieldStyle(.roundedBorder)
-                    // 텍스트필드 입력마다 호출
-                    .onReceive(vm.$loginPW) { passWord in
-                        // id, pw 입력 되었는지 확인 메서드 호출
-                        vm.inputStatus(loginPW: passWord ?? "")
-                    }
-                } //:HSTACK
-                .padding(.bottom)
-                
-                Spacer()
-                    .frame(height: 50) // Spacer 높이 설정
-                
-                HStack(spacing: 60) {
-                    Button {
-                        // TODO: Login Logic
-                        vm.login { result in
-                            switch result {
-                            case .success:
-                                print("성공")
-                            case .failure(let error):
-                                self.alertType = error
-                                vm.showAlert.toggle()
-                                switch error {
-                                case .authError:
-                                    print("인증에러")
-                                case .notEmailFormat:
-                                    print("이메일 형식 아님)")
+                    HStack() {
+                        Text("ID")
+                            .font(.title)
+                            .frame(width:60, height: 40)
+                        
+                        // (Binding) 사용자 정의 바인딩
+                        TextField("이메일 형식의 아이디를 입력하세요", text: Binding(
+                            get: { vm.loginID ?? ""},
+                            set: { vm.loginID = $0.isEmpty ? nil : $0}))
+                        .textFieldStyle(.roundedBorder)
+                        .font(.headline)
+                        .onReceive(vm.$loginID) { id in
+                            vm.inputStatus(loginID: id ?? "")
+                        }
+                    } //:HSTACK
+                    .padding(.bottom)
+                    
+                    HStack {
+                        Text("암호")
+                            .font(.title)
+                            .frame(width:60, height: 40)
+                        
+                        SecureField("패스워드를 입력하세요", text: Binding(
+                            get: { vm.loginPW ?? ""},
+                            set: { vm.loginPW = $0.isEmpty ? nil : $0}))
+                        .textFieldStyle(.roundedBorder)
+                        // 텍스트필드 입력마다 호출
+                        .onReceive(vm.$loginPW) { passWord in
+                            // id, pw 입력 되었는지 확인 메서드 호출
+                            vm.inputStatus(loginPW: passWord ?? "")
+                        }
+                    } //:HSTACK
+                    .padding(.bottom)
+                    
+                    Spacer()
+                        .frame(height: 50) // Spacer 높이 설정
+                    
+                    HStack(spacing: 60) {
+                        Button {
+                            vm.login { result in
+                                switch result {
+                                case .success:
+                                    self.mainVm.isLoginStatus = false // 로그인 성공
+                                    print("성공")
+                                case .failure(let error):
+                                    self.alertType = error
+                                    vm.showAlert.toggle()
+                                    switch error {
+                                    case .authError:
+                                        print("인증에러")
+                                    case .notEmailFormat:
+                                        print("이메일 형식 아님)")
+                                    }
                                 }
                             }
+                        } label: {
+                            Text("로그인")
                         }
-                    } label: {
-                        Text("로그인")
-                    }
-                    .alert(isPresented: $vm.showAlert) {
-                        // TODO: Alert 'check' Logic
-                        getAlert()
-                    }
-                    .frame(width: 100, height: 50)
-                    .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
-                    .foregroundColor(.white)
-                    .font(.title.bold())
-                    .disabled(!vm.isInputValid)
-                    
-                    
-                    Button {
-                        // TODO: Login cancel logic
+                        .alert(isPresented: $vm.showAlert) {
+                            getAlert()
+                        }
+                        .frame(width: 100, height: 50)
+                        .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
+                        .foregroundColor(.white)
+                        .font(.title.bold())
+                        .disabled(!vm.isInputValid)
                         
-                    } label: {
-                        Text("취소")
-                    }
-                    .frame(width: 100, height: 50)
-                    .background(Color("LoginButtonColor").opacity(0.2).cornerRadius(10).shadow(radius: 2))
-                    .foregroundColor(.white)
-                    .font(.title.bold())
-                    
-                    
-                } //:HSTACK
-                Spacer()
-                
-                Divider()
-                
-                VStack(spacing: 10) {
-                    Text("회원이 아니신가요?")
-                        .font(.footnote)
-                        .foregroundStyle(.gray.opacity(0.8))
-                    
-                    Text("회원가입")
-                        .fontWeight(.bold)
-                        .foregroundStyle(.blue)
-                        .onTapGesture {
-                            // TODO: onTabGesture(ResiterView)
-                            
+                        Button {
+                            // TODO: Login cancel logic
+                        } label: {
+                            Text("취소")
                         }
+                        .frame(width: 100, height: 50)
+                        .background(Color("LoginButtonColor").opacity(0.2).cornerRadius(10).shadow(radius: 2))
+                        .foregroundColor(.white)
+                        .font(.title.bold())
+                    } //:HSTACK
+                    Spacer()
+                    
+                    Divider()
+                    
+                    VStack(spacing: 10) {
+                        Text("회원이 아니신가요?")
+                            .font(.footnote)
+                            .foregroundStyle(.primary.opacity(0.5))
+                        
+                        NavigationLink {
+                            RegisterView()
+                        } label: {
+                            Text("회원가입")
+                                .fontWeight(.bold)
+                                .foregroundStyle(.blue)
+                        }
+                    } //:VSTACK
                 } //:VSTACK
-                
-            } //:VSTACK
-            .padding()
-        } //:ZSTACK
+                .padding()
+            } //:ZSTACK
+        } //:NAVIGATION
     }
     
     // MARK: - Function
@@ -156,5 +151,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView()
+    LoginView(mainVm: MainViewModel())
 }

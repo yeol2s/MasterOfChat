@@ -18,14 +18,14 @@ enum LoginError: Error {
 }
 
 
-final class UserViewModel: ObservableObject {
+final class UserAuthViewModel: ObservableObject {
     
     // MARK: - Property
     // 로그인
     @Published var loginID: String?
     @Published var loginPW: String?
     @Published var isInputValid: Bool = false
-    
+    // Alert
     @Published var showAlert: Bool = false
     
     // 회원가입
@@ -47,8 +47,7 @@ final class UserViewModel: ObservableObject {
                 completion(.failure(.notEmailFormat))
                 return }
             // FireBase 로그인 결과를 받아와서 클로저 처리
-            Auth.auth().signIn(withEmail: id, password: pw) { [weak self] authResult, error in
-                guard let _ = self else { return }
+            Auth.auth().signIn(withEmail: id, password: pw) { authResult, error in
                 if let error = error {
                     print(error.localizedDescription)
                     completion(.failure(.authError))
