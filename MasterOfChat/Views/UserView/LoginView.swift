@@ -12,7 +12,7 @@ struct LoginView: View {
     
     // MARK: - Property
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
-    @StateObject var vm = UserAuthViewModel()
+    @StateObject var vm: LoginViewModel = LoginViewModel()
     
     @ObservedObject var mainVm: MainViewModel // 메인뷰모델
     
@@ -78,7 +78,7 @@ struct LoginView: View {
                                     case .authError:
                                         print("인증에러")
                                     case .notEmailFormat:
-                                        print("이메일 형식 아님)")
+                                        print("이메일 형식 아님")
                                     }
                                 }
                             }

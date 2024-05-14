@@ -4,7 +4,7 @@
 //
 //  Created by 유성열 on 5/7/24.
 //
-// MARK: - UserViewModel(로그인, 회원가입)
+// MARK: - Login ViewModel(로그인, 회원가입)
 // (LoginView)로그인 뷰에서 뷰모델 생성하고 회원가입을 진행할 시 (RegisterView)회원가입 뷰로 뷰모델 넘겨주도록
 // MARK: - 🖐️ SOLID의 단일책임을 고려했을 때 로그인, 회원가입 뷰모델을 나누는 것이 좋을까?(아니면 '로그인->회원가입'을 하나의 책임으로 볼 수 있을까?)
 
@@ -18,7 +18,7 @@ enum LoginError: Error {
 }
 
 
-final class UserAuthViewModel: ObservableObject {
+final class LoginViewModel: ObservableObject {
     
     // MARK: - Property
     // 로그인
