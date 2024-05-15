@@ -42,7 +42,7 @@ struct MainView: View {
                 } //:HSTACK
                 .background(Color("ChatRoomColor").opacity(0.5))
             } //:VSTACK
-            .fullScreenCover(isPresented: $vm.isLoginStatus) { //sheet
+            .fullScreenCover(isPresented: $vm.isLoginStatus) { //sheet(로그인 안되어있을시 로그인뷰)
                 LoginView(mainVm: vm)
             }
         .navigationBarTitle("채팅방", displayMode: .inline)

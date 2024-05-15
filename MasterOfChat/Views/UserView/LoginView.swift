@@ -16,7 +16,7 @@ struct LoginView: View {
     
     @ObservedObject var mainVm: MainViewModel // 메인뷰모델
     
-    @State var alertType: LoginError? = nil
+    @State var alertType: AlertType? = nil
     
     // MARK: - View
     var body: some View {
@@ -68,17 +68,19 @@ struct LoginView: View {
                         Button {
                             vm.login { result in
                                 switch result {
-                                case .success:
+                                case .success(let success):
                                     self.mainVm.isLoginStatus = false // 로그인 성공
-                                    print("성공")
+                                    self.alertType = success
+                                    vm.showAlert.toggle()
+                                    print("로그인: 성공")
                                 case .failure(let error):
                                     self.alertType = error
                                     vm.showAlert.toggle()
                                     switch error {
                                     case .authError:
-                                        print("인증에러")
+                                        print("로그인: 인증에러")
                                     case .notEmailFormat:
-                                        print("이메일 형식 아님")
+                                        print("로그인: 이메일 형식 아님")
                                     }
                                 }
                             }
@@ -86,7 +88,11 @@ struct LoginView: View {
                             Text("로그인")
                         }
                         .alert(isPresented: $vm.showAlert) {
-                            getAlert()
+                            if let alert = alertType {
+                                getAlert(alert: alert)
+                            } else {
+                                getAlert("로그인 실패")
+                            }
                         }
                         .frame(width: 100, height: 50)
                         .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
@@ -129,22 +135,21 @@ struct LoginView: View {
     
     // MARK: - Function
     
-    private func getAlert() -> Alert {
-        let title = "오류"
-        var message = ""
-        
-        switch alertType {
-        case .authError:
-            message = "인증되지 않은 사용자입니다."
-        case .notEmailFormat:
-            message = "이메일 형식으로 로그인해 주세요"
-        case .none:
-            message = "알 수 없는 오류"
-        }
+    private func getAlert(alert: AlertType) -> Alert {
+
+        let alertValue = vm.getAlertValue(alert: alert)
         
         return Alert(
-            title: Text(title),
-            message: Text(message),
+            title: Text(alertValue.title),
+            message: Text(alertValue.message),
+            dismissButton: .default(Text("확인"))
+        )
+    }
+    
+    private func getAlert(_ alert: String) -> Alert {
+        return Alert(
+            title: Text(alert),
+            message: Text("다시 시도해 주세요"),
             dismissButton: .default(Text("확인"))
         )
     }

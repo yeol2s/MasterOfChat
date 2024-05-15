@@ -24,6 +24,8 @@ final class MainViewModel: ObservableObject {
     
     // MARK: - Funtion
     
+    
+    // MARK: - Private Function
     // MARK: - 🖐️ sheet 때문에 Bool 값을 반대로 설정했는데 추후 다시 보자.
     // 로그인 상태 Bool 값으로 할당(.sheet에 바인딩되어 true일시 로그인뷰로 sheet되므로 Bool 값을 반대로 할당)
     private func setupLoginStatus() {

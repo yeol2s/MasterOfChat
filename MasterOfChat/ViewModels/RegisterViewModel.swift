@@ -10,19 +10,13 @@
 import Foundation
 import Firebase
 
-// MARK: - TypeAlias
-typealias AlertStatus = (title: String, message: String)
-
-// MARK: - Protocol
-protocol AlertType { }
-
 // MARK: - Enum
-enum RegisterSuccess: AlertType {
+enum RegisterSuccess: AlertType { // 회원 가입 성공(Success)
     case joinSuccess
 }
 
 // MARK: - Error
-enum RegisterError: Error, AlertType {
+enum RegisterError: Error, AlertType { // 회원 가입 실패(Error)
     case notEmailFormat
     case notPasswordSame
     case passwordLength
@@ -47,7 +41,7 @@ final class RegisterViewModel: ObservableObject {
             completion(.failure(.notEmailFormat))
             return }
         
-        if registerPW.count >= 4 {
+        if registerPW.count >= 6 { // 패스워드는 6자리 이상(Firebase에서 6자리 이상 요구)
             if registerPW == confirmPW {
                 registerAuth { result in
                     if result {
@@ -64,20 +58,35 @@ final class RegisterViewModel: ObservableObject {
         }
     }
     
-    // MARK: 🖐️ 다형성을 기반으로한 메서드 만들어봄
-    // Alert
-    func getAlertValue(alert: AlertType) -> AlertStatus {
+    func getAlertValue(alert: AlertType) -> AlertValue {
         
         if alert is RegisterSuccess {
             print("성공")
+            if let value = alert as? RegisterSuccess {
+                switch value {
+                case .joinSuccess:
+                    return ("성공", "가입이 완료되었습니다")
+                }
+            }
         } else if alert is RegisterError {
             print("실패")
+            if let value = alert as? RegisterError {
+                switch value {
+                case .notEmailFormat:
+                    return ("오류", "이메일 계정이 아닙니다")
+                case .notPasswordSame:
+                    return ("오류", "패스워드를 확인하세요")
+                case .passwordLength:
+                    return ("오류", "패스워드가 짧습니다(4자리 이상)")
+                case .authFailed:
+                    return ("오류", "인증 오류")
+                }
+            }
         }
-        
-        
-        return
+        return ("오류", "알 수 없는 오류 발생")
     }
     
+    // MARK: - Private Function
     
     // (Firebase)계정 등록
     private func registerAuth(completion: @escaping (Bool) -> Void) {

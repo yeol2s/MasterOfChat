@@ -11,8 +11,19 @@
 import Foundation
 import Firebase
 
+// MARK: - TypeAlias
+typealias AlertValue = (title: String, message: String)
+
+// MARK: - Protocol
+protocol AlertType { } // 다형성 메서드를 위한 프로토콜 선언
+
+// MARK: - Enum
+enum LoginSuccess: AlertType { // 로그인 성공(Success)
+    case loginSuccess
+}
+
 // MARK: - Error
-enum LoginError: Error {
+enum LoginError: Error, AlertType { // 로그인 실패(Error)
     case notEmailFormat
     case authError
 }
@@ -28,10 +39,6 @@ final class LoginViewModel: ObservableObject {
     // Alert
     @Published var showAlert: Bool = false
     
-    // 회원가입
-//    @Published var registerID: String?
-//    @Published var registerPW: String?
-//    @Published var confirmPW: String?
     
     // MARK: - init
     
@@ -40,7 +47,7 @@ final class LoginViewModel: ObservableObject {
     
     // (FireBase)로그인
     // 컴플리션핸들러처리 -> Auth.signIn 클로저의 결과처리를 Result로 뷰에서 참조하기 위해(힙 영역 보냄)
-    func login(completion: @escaping (Result<Void, LoginError>) -> Void) {
+    func login(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
         if let id = loginID, let pw = loginPW {
             // 이메일 형식 확인
             guard isValidEmail(id) else {
@@ -52,7 +59,7 @@ final class LoginViewModel: ObservableObject {
                     print(error.localizedDescription)
                     completion(.failure(.authError))
                 } else {
-                    completion(.success(()))
+                    completion(.success(.loginSuccess))
                 }
             }
         }
@@ -84,6 +91,33 @@ final class LoginViewModel: ObservableObject {
             print("false")
         }
     }
+    
+    // MARK: 🖐️ 다형성을 기반으로한 메서드 만들어봄
+    // Alert(alert: AlertType 프로토콜 타입) -> AlertValue 타입애일리어스
+    func getAlertValue(alert: AlertType) -> AlertValue {
+        
+        if alert is LoginSuccess {
+            print("로그인 성공")
+            if let value = alert as? LoginSuccess {
+                switch value {
+                case .loginSuccess:
+                    return ("완료", "로그인 되었습니다")
+                }
+            }
+        } else if alert is LoginError {
+            if let value = alert as? LoginError {
+                switch value {
+                case .notEmailFormat:
+                    return ("실패", "이메일 형식으로 로그인하세요")
+                case .authError:
+                    return ("실패", "인증되지 않은 사용자")
+                }
+            }
+        }
+        return ("실패", "알 수 없는 오류 발생")
+    }
+    
+    // MARK: - Private Function
     
     // 이메일 유효성 확인
     private func isValidEmail(_ email: String) -> Bool {
