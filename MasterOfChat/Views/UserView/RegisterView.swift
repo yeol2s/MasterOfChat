@@ -68,6 +68,7 @@ struct RegisterView: View {
                         self.alertType = success
                         vm.showAlert.toggle()
                         print("가입 성공")
+                        // TODO: sheet MainView
                     case .failure(let error):
                         self.alertType = error
                         vm.showAlert.toggle()

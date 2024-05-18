@@ -97,10 +97,12 @@ final class LoginViewModel: ObservableObject {
     func getAlertValue(alert: AlertType) -> AlertValue {
         
         if alert is LoginSuccess {
+            // MARK: 🖐️ 바인딩된 Alert에서 메서드가 중복호출되는데 이게 뷰의 재렌더링 방식? 때문이라고 하는데 근본적으로 문제가 없는지 방지를 위한 처리가 필요한지.
             print("로그인 성공")
             if let value = alert as? LoginSuccess {
                 switch value {
                 case .loginSuccess:
+                    print("success")
                     return ("완료", "로그인 되었습니다")
                 }
             }

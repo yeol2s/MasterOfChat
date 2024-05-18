@@ -46,10 +46,33 @@ struct MainView: View {
                 LoginView(mainVm: vm)
             }
         .navigationBarTitle("채팅방", displayMode: .inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    // TODO: Logout
+                    vm.showAlert.toggle()
+                } label: {
+                    Image(systemName: "power")
+                        .font(.title3)
+                        .tint(.green)
+                }
+                .alert(isPresented: $vm.showAlert) {
+                    getAlert()
+                }
+            }
+        }
     }
     
     // MARK: - Function
-
+    private func getAlert() -> Alert {
+        return Alert(
+            title: Text("알림"),
+        message: Text("로그아웃 하시겠습니까?"),
+            primaryButton: .destructive(Text("확인"), action: {
+                vm.signOut()
+            }),
+            secondaryButton: .cancel(Text("취소"))
+        )}
 }
 
 

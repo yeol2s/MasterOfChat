@@ -72,7 +72,6 @@ struct LoginView: View {
                                     self.mainVm.isLoginStatus = false // 로그인 성공
                                     self.alertType = success
                                     vm.showAlert.toggle()
-                                    print("로그인: 성공")
                                 case .failure(let error):
                                     self.alertType = error
                                     vm.showAlert.toggle()
@@ -136,7 +135,7 @@ struct LoginView: View {
     // MARK: - Function
     
     private func getAlert(alert: AlertType) -> Alert {
-
+        print("getAlert")
         let alertValue = vm.getAlertValue(alert: alert)
         
         return Alert(
