@@ -10,7 +10,7 @@ import SwiftUI
 
 struct MainView: View {
     // MARK: - Property
-    @StateObject var vm = MainViewModel()
+    @StateObject var vm = AuthViewModel()
     
     // TODO: 뷰모델에서 관리할 채팅 입력 텍스트필드(임시)
     @State private var textChat: String = ""

@@ -4,13 +4,13 @@
 //
 //  Created by 유성열 on 5/13/24.
 //
-// MARK: - Main ViewModel(
-// 채팅 화면
+// MARK: - AuthViewModel(FireBase 인증관리)
+// MainView
 
 import Foundation
 import Firebase
 
-final class MainViewModel: ObservableObject {
+final class AuthViewModel: ObservableObject {
     // MARK: - Property
     // 현재 유저 로그인 상태 체크
     @Published private var currentUser: Firebase.User?

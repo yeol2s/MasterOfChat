@@ -14,7 +14,7 @@ struct LoginView: View {
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
     @StateObject var vm: LoginViewModel = LoginViewModel()
     
-    @ObservedObject var mainVm: MainViewModel // 메인뷰모델
+    @ObservedObject var mainVm: AuthViewModel // 메인뷰모델
     
     // MARK: - View
     var body: some View {
@@ -153,5 +153,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView(mainVm: MainViewModel())
+    LoginView(mainVm: AuthViewModel())
 }
