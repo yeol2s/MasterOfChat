@@ -16,8 +16,6 @@ struct LoginView: View {
     
     @ObservedObject var mainVm: MainViewModel // 메인뷰모델
     
-    @State var alertType: AlertType? = nil
-    
     // MARK: - View
     var body: some View {
         NavigationView {
@@ -32,7 +30,7 @@ struct LoginView: View {
                             .font(.title)
                             .frame(width:60, height: 40)
                         
-                        // (Binding) 사용자 정의 바인딩
+                        // (Binding) 사용자 정의 바인딩(옵셔널이라)
                         TextField("이메일 형식의 아이디를 입력하세요", text: Binding(
                             get: { vm.loginID ?? ""},
                             set: { vm.loginID = $0.isEmpty ? nil : $0}))
@@ -70,10 +68,10 @@ struct LoginView: View {
                                 switch result {
                                 case .success(let success):
                                     self.mainVm.isLoginStatus = false // 로그인 성공
-                                    self.alertType = success
+                                    vm.alertType = success
                                     vm.showAlert.toggle()
                                 case .failure(let error):
-                                    self.alertType = error
+                                    vm.alertType = error
                                     vm.showAlert.toggle()
                                     switch error {
                                     case .authError:
@@ -87,7 +85,7 @@ struct LoginView: View {
                             Text("로그인")
                         }
                         .alert(isPresented: $vm.showAlert) {
-                            if let alert = alertType {
+                            if let alert = vm.alertType {
                                 getAlert(alert: alert)
                             } else {
                                 getAlert("로그인 실패")

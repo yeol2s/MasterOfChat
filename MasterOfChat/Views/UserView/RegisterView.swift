@@ -14,8 +14,6 @@ struct RegisterView: View {
     // MARK: - Property
     @StateObject var vm: RegisterViewModel = RegisterViewModel()
     
-    @State var alertType: AlertType? = nil
-    
     // MARK: - View
     var body: some View {
         VStack(spacing: 20) {
@@ -65,12 +63,12 @@ struct RegisterView: View {
                 vm.isChecked { result in
                     switch result {
                     case .success(let success):
-                        self.alertType = success
+                        vm.alertType = success
                         vm.showAlert.toggle()
                         print("가입 성공")
                         // TODO: sheet MainView
                     case .failure(let error):
-                        self.alertType = error
+                        vm.alertType = error
                         vm.showAlert.toggle()
                     }
                 }
@@ -78,7 +76,7 @@ struct RegisterView: View {
                 Text("회원 가입")
             }
             .alert(isPresented: $vm.showAlert) {
-                if let alert = alertType {
+                if let alert = vm.alertType {
                     getAlert(alert: alert)
                 } else {
                     getAlert("알림")

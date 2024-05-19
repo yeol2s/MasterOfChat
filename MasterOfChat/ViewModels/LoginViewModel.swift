@@ -38,6 +38,7 @@ final class LoginViewModel: ObservableObject {
     @Published var isInputValid: Bool = false
     // Alert
     @Published var showAlert: Bool = false
+    var alertType: AlertType? = nil
     
     
     // MARK: - init
@@ -102,7 +103,6 @@ final class LoginViewModel: ObservableObject {
             if let value = alert as? LoginSuccess {
                 switch value {
                 case .loginSuccess:
-                    print("success")
                     return ("완료", "로그인 되었습니다")
                 }
             }

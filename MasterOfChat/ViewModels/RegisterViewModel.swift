@@ -32,6 +32,7 @@ final class RegisterViewModel: ObservableObject {
     
     // Alert
     @Published var showAlert: Bool = false
+    var alertType: AlertType? = nil
     
     // MARK: - Function
     
