@@ -11,11 +11,11 @@
 import Foundation
 import Firebase
 
-// MARK: - TypeAlias
-typealias AlertValue = (title: String, message: String)
-
 // MARK: - Protocol
 protocol AlertType { } // 다형성 메서드를 위한 프로토콜 선언
+
+// MARK: - TypeAlias
+typealias AlertValue = (title: String, message: String)
 
 // MARK: - Enum
 enum LoginSuccess: AlertType { // 로그인 성공(Success)

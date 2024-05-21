@@ -10,10 +10,8 @@ import SwiftUI
 
 struct MainView: View {
     // MARK: - Property
-    @StateObject var vm = AuthViewModel()
-    
-    // TODO: 뷰모델에서 관리할 채팅 입력 텍스트필드(임시)
-    @State private var textChat: String = ""
+    @StateObject var authVm = AuthViewModel() // 인증 뷰모델
+    @StateObject var chatVm = ChatViewModel() // 채팅 뷰모델
     
     // MARK: - View
     var body: some View {
@@ -23,10 +21,10 @@ struct MainView: View {
                     Text("테스트 채팅")
                 } //:LIST
                 .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
-                .background(Color("ChatRoomColor"))
+                .background(Color(K.AppColors.chatRoomColor))
                 
                 HStack {
-                    TextEditor(text: $textChat)
+                    TextEditor(text: $chatVm.chatText)
                         .frame(minHeight: 50, maxHeight: 150)
                         .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/) // 텍스트에디터 높이 동적 크기 조절
                         .background(Color.clear)
@@ -40,23 +38,23 @@ struct MainView: View {
                     }
                     .padding(.trailing, 20)
                 } //:HSTACK
-                .background(Color("ChatRoomColor").opacity(0.5))
+                .background(Color(K.AppColors.chatRoomColor).opacity(0.5))
             } //:VSTACK
-            .fullScreenCover(isPresented: $vm.isLoginStatus) { //sheet(로그인 안되어있을시 로그인뷰)
-                LoginView(mainVm: vm)
+            .fullScreenCover(isPresented: $authVm.isLoginStatus) { //sheet(로그인 안되어있을시 로그인뷰)
+                LoginView(mainVm: authVm)
             }
         .navigationBarTitle("채팅방", displayMode: .inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     // TODO: Logout
-                    vm.showAlert.toggle()
+                    authVm.showAlert.toggle()
                 } label: {
                     Image(systemName: "power")
                         .font(.title3)
                         .tint(.green)
                 }
-                .alert(isPresented: $vm.showAlert) {
+                .alert(isPresented: $authVm.showAlert) {
                     getAlert()
                 }
             }
@@ -69,7 +67,7 @@ struct MainView: View {
             title: Text("알림"),
         message: Text("로그아웃 하시겠습니까?"),
             primaryButton: .destructive(Text("확인"), action: {
-                vm.signOut()
+                authVm.signOut()
             }),
             secondaryButton: .cancel(Text("취소"))
         )}

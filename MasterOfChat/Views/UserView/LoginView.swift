@@ -20,7 +20,7 @@ struct LoginView: View {
     var body: some View {
         NavigationView {
             ZStack { // 전체 백그라운드 적용을 위한 ZStack
-                Color("LoginColor").ignoresSafeArea()
+                Color(K.AppColors.loginBackGround).ignoresSafeArea()
                 VStack(alignment: .center) {
                     
                     Spacer()
@@ -92,7 +92,7 @@ struct LoginView: View {
                             }
                         }
                         .frame(width: 100, height: 50)
-                        .background(Color("LoginButtonColor").cornerRadius(10).shadow(radius: 2))
+                        .background(Color(K.AppColors.loginBtnColor).cornerRadius(10).shadow(radius: 2))
                         .foregroundColor(.white)
                         .font(.title.bold())
                         .disabled(!vm.isInputValid)
@@ -103,7 +103,7 @@ struct LoginView: View {
                             Text("취소")
                         }
                         .frame(width: 100, height: 50)
-                        .background(Color("LoginButtonColor").opacity(0.2).cornerRadius(10).shadow(radius: 2))
+                        .background(Color(K.AppColors.loginBtnColor).opacity(0.2).cornerRadius(10).shadow(radius: 2))
                         .foregroundColor(.white)
                         .font(.title.bold())
                     } //:HSTACK

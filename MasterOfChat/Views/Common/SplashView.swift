@@ -21,13 +21,13 @@ struct SplashView: View {
             }
         } else {
             VStack(spacing: 20) {
-                Image("bird")
+                Image(K.appIcon)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 200, height: 200)
                     .cornerRadius(100)
                 
-                Text("채팅의 고수")
+                Text(K.appName)
                     .font(.title.bold())
             } //:VSTACK
             .scaleEffect(size)
