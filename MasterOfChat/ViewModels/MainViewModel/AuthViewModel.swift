@@ -18,8 +18,12 @@ final class AuthViewModel: ObservableObject {
     
     @Published var showAlert: Bool = false
     
+    private let firebaseService: FirebaseServiceProtocol
+    
     // MARK: - init
-    init() {
+    // 싱글톤으로 FirebaseSerivce 주입
+    init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
+        self.firebaseService = firebaseService
         setupFirebaseAuth() // Firebase 셋업(등록사용자 및 로그인 상태 확인)
     }
     

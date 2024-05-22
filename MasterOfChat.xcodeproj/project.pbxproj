@@ -15,6 +15,7 @@
 		968ACB3D2BE98C4500B30E21 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968ACB3C2BE98C4500B30E21 /* LoginViewModel.swift */; };
 		9699952F2BFA571D00785141 /* ChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9699952E2BFA571D00785141 /* ChatViewModel.swift */; };
 		969995312BFA575400785141 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969995302BFA575400785141 /* Message.swift */; };
+		96A8A5132BFE387A007B2A93 /* FirebaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A8A5122BFE387A007B2A93 /* FirebaseService.swift */; };
 		96BF03762BF120BD0039AD9E /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BF03752BF120BD0039AD9E /* AuthViewModel.swift */; };
 		96D8E0452BE483BF00828622 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 96D8E0442BE483BE00828622 /* GoogleService-Info.plist */; };
 		96D8E0A22BE4972B00828622 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 96D8E0A12BE4972B00828622 /* FirebaseAuth */; };
@@ -48,6 +49,7 @@
 		968ACB3C2BE98C4500B30E21 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		9699952E2BFA571D00785141 /* ChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewModel.swift; sourceTree = "<group>"; };
 		969995302BFA575400785141 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
+		96A8A5122BFE387A007B2A93 /* FirebaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseService.swift; sourceTree = "<group>"; };
 		96BF03752BF120BD0039AD9E /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		96D8E0442BE483BE00828622 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		96D8E0BF2BE4ACF100828622 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				967F74142BE351BE00206094 /* App */,
+				96A8A5112BFE3853007B2A93 /* APIService */,
 				967F74132BE351B300206094 /* Model */,
 				967F74122BE351AA00206094 /* ViewModels */,
 				967F74112BE3519C00206094 /* Views */,
@@ -181,6 +184,14 @@
 				9699952E2BFA571D00785141 /* ChatViewModel.swift */,
 			);
 			path = MainViewModel;
+			sourceTree = "<group>";
+		};
+		96A8A5112BFE3853007B2A93 /* APIService */ = {
+			isa = PBXGroup;
+			children = (
+				96A8A5122BFE387A007B2A93 /* FirebaseService.swift */,
+			);
+			path = APIService;
 			sourceTree = "<group>";
 		};
 		96D8E0C12BE4AEC200828622 /* UserView */ = {
@@ -308,6 +319,7 @@
 				96D8E0C02BE4ACF100828622 /* LoginView.swift in Sources */,
 				968ACB3D2BE98C4500B30E21 /* LoginViewModel.swift in Sources */,
 				969995312BFA575400785141 /* Message.swift in Sources */,
+				96A8A5132BFE387A007B2A93 /* FirebaseService.swift in Sources */,
 				9699952F2BFA571D00785141 /* ChatViewModel.swift in Sources */,
 				967F74172BE352F100206094 /* SplashView.swift in Sources */,
 			);

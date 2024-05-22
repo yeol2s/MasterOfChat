@@ -36,19 +36,25 @@ final class LoginViewModel: ObservableObject {
     @Published var loginID: String?
     @Published var loginPW: String?
     @Published var isInputValid: Bool = false
+    
     // Alert
     @Published var showAlert: Bool = false
     var alertType: AlertType? = nil
     
+    // FirebaseService: Protocol
+    private let firebaseSerive: FirebaseServiceProtocol
     
     // MARK: - init
+    init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
+        self.firebaseSerive = firebaseService
+    }
     
     
     // MARK: - Function
     
     // (FireBase)로그인
     // 컴플리션핸들러처리 -> Auth.signIn 클로저의 결과처리를 Result로 뷰에서 참조하기 위해(힙 영역 보냄)
-    func login(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
+    func signIn(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
         if let id = loginID, let pw = loginPW {
             // 이메일 형식 확인
             guard isValidEmail(id) else {

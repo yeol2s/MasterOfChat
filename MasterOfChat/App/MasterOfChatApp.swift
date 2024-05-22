@@ -12,6 +12,8 @@ import Firebase
 @main
 struct MasterOfChatApp: App {
     
+//    let firebaseService = FirebaseService() // FirebaseService 객체 생성(의존성 관리를 위함)
+    
     // MARK: Firebase 초기화 코드
     init() {
         FirebaseApp.configure() // 파이어베이스 서버연결

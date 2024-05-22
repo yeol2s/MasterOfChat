@@ -24,6 +24,9 @@ enum RegisterError: Error, AlertType { // 회원 가입 실패(Error)
 }
 
 final class RegisterViewModel: ObservableObject {
+    
+    private let firebaseService: FirebaseServiceProtocol
+    
     // MARK: - Property
     // (기본값)빈문자열로
     @Published var registerID: String = ""
@@ -33,6 +36,12 @@ final class RegisterViewModel: ObservableObject {
     // Alert
     @Published var showAlert: Bool = false
     var alertType: AlertType? = nil
+    
+    // MARK: - init
+    init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
+        self.firebaseService = firebaseService
+    }
+
     
     // MARK: - Function
     
@@ -44,7 +53,7 @@ final class RegisterViewModel: ObservableObject {
         
         if registerPW.count >= 6 { // 패스워드는 6자리 이상(Firebase에서 6자리 이상 요구)
             if registerPW == confirmPW {
-                registerAuth { result in
+                signUp { result in
                     if result {
                         completion(.success(.joinSuccess))
                     } else {
@@ -90,7 +99,7 @@ final class RegisterViewModel: ObservableObject {
     // MARK: - Private Function
     
     // (Firebase)계정 등록
-    private func registerAuth(completion: @escaping (Bool) -> Void) {
+    private func signUp(completion: @escaping (Bool) -> Void) {
         Auth.auth().createUser(withEmail: registerID, password: registerPW) { authResult, error in
             if let error = error {
                 print("에러 발생:\(error.localizedDescription)")

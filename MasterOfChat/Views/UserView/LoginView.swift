@@ -14,7 +14,8 @@ struct LoginView: View {
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
     @StateObject var vm: LoginViewModel = LoginViewModel()
     
-    @ObservedObject var mainVm: AuthViewModel // 메인뷰모델
+    @ObservedObject var authVm: AuthViewModel // 인증 뷰모델
+    
     
     // MARK: - View
     var body: some View {
@@ -64,10 +65,10 @@ struct LoginView: View {
                     
                     HStack(spacing: 60) {
                         Button {
-                            vm.login { result in
+                            vm.signIn { result in
                                 switch result {
                                 case .success(let success):
-                                    self.mainVm.isLoginStatus = false // 로그인 성공
+                                    self.authVm.isLoginStatus = false // 로그인 성공
                                     vm.alertType = success
                                     vm.showAlert.toggle()
                                 case .failure(let error):
@@ -153,5 +154,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView(mainVm: AuthViewModel())
+    LoginView(authVm: AuthViewModel())
 }

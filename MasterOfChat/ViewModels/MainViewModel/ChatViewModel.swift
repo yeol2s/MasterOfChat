@@ -19,8 +19,11 @@ final class ChatViewModel: ObservableObject  {
     
     let db = Firestore.firestore() // FireStore 데이터베이스 참조 생성
     
+    private let firebaseService: FirebaseServiceProtocol
+    
     // MARK: - init
-    init() {
+    init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
+        self.firebaseService = firebaseService
         loadMessage()
     }
     
