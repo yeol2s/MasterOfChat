@@ -14,7 +14,7 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Property
     // 현재 유저 로그인 상태 체크
     @Published private var currentUser: Firebase.User?
-    @Published var isLoginStatus: Bool = false
+    @Published var isloginViewSheet: Bool = false
     
     @Published var showAlert: Bool = false
     
@@ -87,15 +87,14 @@ final class AuthViewModel: ObservableObject {
     }
     
     
-    // MARK: 🖐️ sheet 때문에 Bool 값을 반대로 설정했는데 추후 다시 보자.
-    // 로그인 상태 Bool 값으로 할당(.sheet에 바인딩되어 true일시 로그인뷰로 sheet되므로 Bool 값을 반대로 할당)
+    // 로그인 상태(상태에 따라 .sheet)
     private func setupLoginStatus() {
         if let _ = currentUser {
             print("setupLoginStatus: false")
-            isLoginStatus = false // false일시 로그인이 되어있음
+            isloginViewSheet = false // false일시 로그인이 되어있음
         } else {
             print("setupLoginStatus: true")
-            isLoginStatus = true // true일시 로그인이 되어있지 않음(로그인 화면 띄움 -> sheet)
+            isloginViewSheet = true // true일시 로그인이 되어있지 않음(로그인 화면 띄움 -> sheet)
         }
     }
 }

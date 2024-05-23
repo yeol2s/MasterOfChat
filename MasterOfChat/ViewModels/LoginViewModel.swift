@@ -42,31 +42,48 @@ final class LoginViewModel: ObservableObject {
     var alertType: AlertType? = nil
     
     // FirebaseService: Protocol
-    private let firebaseSerive: FirebaseServiceProtocol
+    private let firebaseService: FirebaseServiceProtocol
     
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
-        self.firebaseSerive = firebaseService
+        self.firebaseService = firebaseService
     }
     
     
     // MARK: - Function
     
+    // MARK: Old
     // (FireBase)로그인
     // 컴플리션핸들러처리 -> Auth.signIn 클로저의 결과처리를 Result로 뷰에서 참조하기 위해(힙 영역 보냄)
-    func signIn(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
+//    func signIn(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
+//        if let id = loginID, let pw = loginPW {
+//            // 이메일 형식 확인
+//            guard isValidEmail(id) else {
+//                completion(.failure(.notEmailFormat))
+//                return }
+//            // FireBase 로그인 결과를 받아와서 클로저 처리
+//            Auth.auth().signIn(withEmail: id, password: pw) { authResult, error in
+//                if let error = error {
+//                    print(error.localizedDescription)
+//                    completion(.failure(.authError))
+//                } else {
+//                    completion(.success(.loginSuccess))
+//                }
+//            }
+//        }
+//    }
+    
+    func signIn() {
         if let id = loginID, let pw = loginPW {
-            // 이메일 형식 확인
-            guard isValidEmail(id) else {
-                completion(.failure(.notEmailFormat))
-                return }
-            // FireBase 로그인 결과를 받아와서 클로저 처리
-            Auth.auth().signIn(withEmail: id, password: pw) { authResult, error in
-                if let error = error {
-                    print(error.localizedDescription)
-                    completion(.failure(.authError))
-                } else {
-                    completion(.success(.loginSuccess))
+            firebaseService.signIn(email: id, password: pw) { [weak self] result in
+                guard let self = self else { return }
+                switch result {
+                case .success(let success):
+                    self.alertType = success
+                    self.showAlert.toggle()
+                case .failure(let error):
+                    self.alertType = error
+                    self.showAlert.toggle()
                 }
             }
         }
@@ -127,17 +144,17 @@ final class LoginViewModel: ObservableObject {
     
     // MARK: - Private Function
     
-    // 이메일 유효성 확인
-    private func isValidEmail(_ email: String) -> Bool {
-        // 이메일 주소 정규표현식
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-        
-        do {
-            let regex = try NSRegularExpression(pattern: emailRegex)
-            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
-            return !matches.isEmpty
-        } catch {
-            return false
-        }
-    }
+//    // 이메일 유효성 확인
+//    private func isValidEmail(_ email: String) -> Bool {
+//        // 이메일 주소 정규표현식
+//        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+//        
+//        do {
+//            let regex = try NSRegularExpression(pattern: emailRegex)
+//            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
+//            return !matches.isEmpty
+//        } catch {
+//            return false
+//        }
+//    }
 }

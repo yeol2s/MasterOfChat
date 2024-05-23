@@ -28,9 +28,23 @@ final class FirebaseService: FirebaseServiceProtocol {
     static let shared = FirebaseService()
     private init() {} // 새로운 객체 생성 차단
     
+    // MARK: - Function
+
+    
     // TODO: 뷰모델에 의존성 주입
     func signIn(email: String, password: String, completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
         // TODO: LoginViewModel
+        guard isValidEmail(email) else {
+            completion(.failure(.notEmailFormat))
+            return }
+        // Firebase 로그인
+        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            if let error = error {
+                completion(.failure(.authError))
+            } else {
+                completion(.success(.loginSuccess))
+            }
+        }
     }
     
     func signUp(email: String, password: String, completion: @escaping (Bool) -> Void) {
@@ -51,6 +65,22 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     func checkIDToken(user: User) {
         // TODO: AuthViewModel
+    }
+    
+    // MARK: - Private Function
+    
+    // 이메일 유효성 확인
+    private func isValidEmail(_ email: String) -> Bool {
+        // 이메일 주소 정규표현식
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        
+        do {
+            let regex = try NSRegularExpression(pattern: emailRegex)
+            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
+            return !matches.isEmpty
+        } catch {
+            return false
+        }
     }
 
 }

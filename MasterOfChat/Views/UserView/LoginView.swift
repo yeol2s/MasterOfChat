@@ -14,6 +14,7 @@ struct LoginView: View {
     // 로그인에서 뷰모델 만들고 회원가입시에는 회원가입뷰로 뷰모델을 넘겨주는 방식으로 하는게 좋을 것 같다.
     @StateObject var vm: LoginViewModel = LoginViewModel()
     
+    // TODO: authVM 필요없을지 고려
     @ObservedObject var authVm: AuthViewModel // 인증 뷰모델
     
     
@@ -65,23 +66,31 @@ struct LoginView: View {
                     
                     HStack(spacing: 60) {
                         Button {
-                            vm.signIn { result in
-                                switch result {
-                                case .success(let success):
-                                    self.authVm.isLoginStatus = false // 로그인 성공
-                                    vm.alertType = success
-                                    vm.showAlert.toggle()
-                                case .failure(let error):
-                                    vm.alertType = error
-                                    vm.showAlert.toggle()
-                                    switch error {
-                                    case .authError:
-                                        print("로그인: 인증에러")
-                                    case .notEmailFormat:
-                                        print("로그인: 이메일 형식 아님")
-                                    }
-                                }
-                            }
+                            // MARK: Old
+//                            vm.signIn { result in
+//                                switch result {
+//                                case .success(let success):
+//                                    self.authVm.isLoginStatus = false // 로그인 성공
+//                                    vm.alertType = success
+//                                    vm.showAlert.toggle()
+//                                case .failure(let error):
+//                                    vm.alertType = error
+//                                    vm.showAlert.toggle()
+//                                    switch error {
+//                                    case .authError:
+//                                        print("로그인: 인증에러")
+//                                    case .notEmailFormat:
+//                                        print("로그인: 이메일 형식 아님")
+//                                    }
+//                                }
+//                            }
+                            
+                            vm.signIn()
+                            // TODO: Dismiss(authVm.isloginViewSheet = false)
+                            // TODO: 비동기 처리되면서 값을 받아오는게 조금 늦어져서 함수 호출까지 기다리지 못해서 계쏙 nil을 받았던 것 ----> async/await 고려?
+                            sheetStatusChange()
+                            
+
                         } label: {
                             Text("로그인")
                         }
@@ -132,6 +141,18 @@ struct LoginView: View {
     }
     
     // MARK: - Function
+    
+    // TODO: authVm.isloginViewSheet = false
+    private func sheetStatusChange() {
+        print("타입 \(type(of: vm.alertType))")
+        print("값은 \(vm.alertType)")
+        // TODO: 여기서 nil이 되므로 바인딩 실패
+//        if let alertType = vm.alertType {
+//            if alertType is LoginSuccess {
+//                authVm.isloginViewSheet = false // 로그인 성공시 .sheet닫음
+//            }
+//        }
+    }
     
     private func getAlert(alert: AlertType) -> Alert {
         print("getAlert")

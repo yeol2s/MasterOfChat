@@ -24,7 +24,7 @@ final class ChatViewModel: ObservableObject  {
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
-        loadMessage()
+        //loadMessage()
     }
     
     
