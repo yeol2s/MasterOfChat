@@ -12,7 +12,8 @@ import Firebase
 
 // MARK: - Protocol
 protocol FirebaseServiceProtocol {
-    func signIn(email: String, password: String, completion: @escaping (Result<LoginSuccess, LoginError>) -> Void)
+    //    func signIn(email: String, password: String, completion: @escaping (Result<LoginSuccess, LoginError>) -> Void)
+    func signIn(email: String, password: String) async -> Result<LoginSuccess, LoginError>
     func signUp(email: String, password: String, completion: @escaping (Bool) -> Void)
     func signOut()
     func loadMessage()
@@ -29,23 +30,20 @@ final class FirebaseService: FirebaseServiceProtocol {
     private init() {} // 새로운 객체 생성 차단
     
     // MARK: - Function
-
     
-    // TODO: 뷰모델에 의존성 주입
-    func signIn(email: String, password: String, completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
-        // TODO: LoginViewModel
-        guard isValidEmail(email) else {
-            completion(.failure(.notEmailFormat))
-            return }
-        // Firebase 로그인
-        Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-            if let error = error {
-                completion(.failure(.authError))
-            } else {
-                completion(.success(.loginSuccess))
+    // async/await
+    func signIn(email: String, password: String) async -> Result<LoginSuccess, LoginError> {
+        await withCheckedContinuation { continuation in
+            Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+                if let _ = error {
+                    continuation.resume(returning: .failure(.authError))
+                } else {
+                    continuation.resume(returning: .success(.loginSuccess))
+                }
             }
         }
     }
+    
     
     func signUp(email: String, password: String, completion: @escaping (Bool) -> Void) {
         // TODO: AuthViewModel
@@ -82,5 +80,5 @@ final class FirebaseService: FirebaseServiceProtocol {
             return false
         }
     }
-
+    
 }

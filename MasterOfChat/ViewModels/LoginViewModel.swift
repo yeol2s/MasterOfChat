@@ -44,6 +44,7 @@ final class LoginViewModel: ObservableObject {
     // FirebaseService: Protocol
     private let firebaseService: FirebaseServiceProtocol
     
+    
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
@@ -51,43 +52,29 @@ final class LoginViewModel: ObservableObject {
     
     
     // MARK: - Function
-    
-    // MARK: Old
-    // (FireBase)로그인
-    // 컴플리션핸들러처리 -> Auth.signIn 클로저의 결과처리를 Result로 뷰에서 참조하기 위해(힙 영역 보냄)
-//    func signIn(completion: @escaping (Result<LoginSuccess, LoginError>) -> Void) {
-//        if let id = loginID, let pw = loginPW {
-//            // 이메일 형식 확인
-//            guard isValidEmail(id) else {
-//                completion(.failure(.notEmailFormat))
-//                return }
-//            // FireBase 로그인 결과를 받아와서 클로저 처리
-//            Auth.auth().signIn(withEmail: id, password: pw) { authResult, error in
-//                if let error = error {
-//                    print(error.localizedDescription)
-//                    completion(.failure(.authError))
-//                } else {
-//                    completion(.success(.loginSuccess))
-//                }
-//            }
-//        }
-//    }
-    
-    func signIn() {
+
+    func signIn() async { // async : 이 메서드가 비동기적으로 실행된다는 것을 나타냄(반환타입 없어도 됨)
         if let id = loginID, let pw = loginPW {
-            firebaseService.signIn(email: id, password: pw) { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let success):
+            // await : 비동기 메서드를 호출할 때 사용(해당 메서드가 완료될 때까지 기다림)
+            let result = await firebaseService.signIn(email: id, password: pw)
+            
+            switch result {
+            case .success(let success):
+                // View를 변경하므로 메인큐에서 처리
+                DispatchQueue.main.async {
                     self.alertType = success
                     self.showAlert.toggle()
-                case .failure(let error):
+                }
+            case .failure(let error):
+                DispatchQueue.main.async {
                     self.alertType = error
                     self.showAlert.toggle()
                 }
             }
         }
     }
+    
+    
     
     
     // loginID 텍스트 검증 후 로그인 버튼 활성화(오버로딩)
@@ -144,17 +131,17 @@ final class LoginViewModel: ObservableObject {
     
     // MARK: - Private Function
     
-//    // 이메일 유효성 확인
-//    private func isValidEmail(_ email: String) -> Bool {
-//        // 이메일 주소 정규표현식
-//        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-//        
-//        do {
-//            let regex = try NSRegularExpression(pattern: emailRegex)
-//            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
-//            return !matches.isEmpty
-//        } catch {
-//            return false
-//        }
-//    }
+    //    // 이메일 유효성 확인
+    //    private func isValidEmail(_ email: String) -> Bool {
+    //        // 이메일 주소 정규표현식
+    //        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+    //
+    //        do {
+    //            let regex = try NSRegularExpression(pattern: emailRegex)
+    //            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
+    //            return !matches.isEmpty
+    //        } catch {
+    //            return false
+    //        }
+    //    }
 }

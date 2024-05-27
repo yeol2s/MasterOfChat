@@ -66,31 +66,13 @@ struct LoginView: View {
                     
                     HStack(spacing: 60) {
                         Button {
-                            // MARK: Old
-//                            vm.signIn { result in
-//                                switch result {
-//                                case .success(let success):
-//                                    self.authVm.isLoginStatus = false // 로그인 성공
-//                                    vm.alertType = success
-//                                    vm.showAlert.toggle()
-//                                case .failure(let error):
-//                                    vm.alertType = error
-//                                    vm.showAlert.toggle()
-//                                    switch error {
-//                                    case .authError:
-//                                        print("로그인: 인증에러")
-//                                    case .notEmailFormat:
-//                                        print("로그인: 이메일 형식 아님")
-//                                    }
-//                                }
-//                            }
-                            
-                            vm.signIn()
-                            // TODO: Dismiss(authVm.isloginViewSheet = false)
-                            // TODO: 비동기 처리되면서 값을 받아오는게 조금 늦어져서 함수 호출까지 기다리지 못해서 계쏙 nil을 받았던 것 ----> async/await 고려?
-                            sheetStatusChange()
-                            
-
+                            // Task : SwiftUI에서 비동기 코드를 실행하기 위한 방법
+                            // SwiftUI의 Button은 동기적으로 동작하므로 비동기 작업을 실행하려면 Task를 명시적으로 사용해야 함.
+                            // 버튼을 탭했을 때 비동기 작업이 시작되고, 완료될 때까지 다른 작업이 차단되지 않는다.(안전하게 비동기 함수 호출)
+                            Task {
+                                await vm.signIn()
+                                sheetStatusChange()
+                            }
                         } label: {
                             Text("로그인")
                         }
@@ -144,14 +126,11 @@ struct LoginView: View {
     
     // TODO: authVm.isloginViewSheet = false
     private func sheetStatusChange() {
-        print("타입 \(type(of: vm.alertType))")
-        print("값은 \(vm.alertType)")
-        // TODO: 여기서 nil이 되므로 바인딩 실패
-//        if let alertType = vm.alertType {
-//            if alertType is LoginSuccess {
-//                authVm.isloginViewSheet = false // 로그인 성공시 .sheet닫음
-//            }
-//        }
+        if let alertType = vm.alertType {
+            if alertType is LoginSuccess {
+                authVm.isloginViewSheet = false // 로그인 성공시 .sheet닫음
+            }
+        }
     }
     
     private func getAlert(alert: AlertType) -> Alert {
