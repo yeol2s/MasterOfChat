@@ -6,7 +6,6 @@
 //
 // MARK: - Login ViewModel(로그인, 회원가입)
 // (LoginView)로그인 뷰에서 뷰모델 생성하고 회원가입을 진행할 시 (RegisterView)회원가입 뷰로 뷰모델 넘겨주도록
-// MARK: - 🖐️ SOLID의 단일책임을 고려했을 때 로그인, 회원가입 뷰모델을 나누는 것이 좋을까?(아니면 '로그인->회원가입'을 하나의 책임으로 볼 수 있을까?)
 
 import Foundation
 import Firebase
@@ -61,13 +60,13 @@ final class LoginViewModel: ObservableObject {
             switch result {
             case .success(let success):
                 // View를 변경하므로 메인큐에서 처리
+                self.alertType = success
                 DispatchQueue.main.async {
-                    self.alertType = success
                     self.showAlert.toggle()
                 }
             case .failure(let error):
+                self.alertType = error
                 DispatchQueue.main.async {
-                    self.alertType = error
                     self.showAlert.toggle()
                 }
             }
@@ -78,7 +77,6 @@ final class LoginViewModel: ObservableObject {
     
     
     // loginID 텍스트 검증 후 로그인 버튼 활성화(오버로딩)
-    // MARK: 🖐️ (이게 최선인가?) 뷰모델에서 id, pw 현재 상태를 체크해서 뷰의 '로그인'버튼을 활성화 비활성화 하게끔 구현했는데 뭔가 로직이 지저분한 느낌임 조금 더 생각해보자.
     func inputStatus(loginID id: String) {
         guard !id.isEmpty else {
             isInputValid = false
@@ -103,7 +101,6 @@ final class LoginViewModel: ObservableObject {
         }
     }
     
-    // MARK: 🖐️ 다형성을 기반으로한 메서드 만들어봄
     // Alert(alert: AlertType 프로토콜 타입) -> AlertValue 타입애일리어스
     func getAlertValue(alert: AlertType) -> AlertValue {
         
@@ -128,20 +125,4 @@ final class LoginViewModel: ObservableObject {
         }
         return ("실패", "알 수 없는 오류 발생")
     }
-    
-    // MARK: - Private Function
-    
-    //    // 이메일 유효성 확인
-    //    private func isValidEmail(_ email: String) -> Bool {
-    //        // 이메일 주소 정규표현식
-    //        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
-    //
-    //        do {
-    //            let regex = try NSRegularExpression(pattern: emailRegex)
-    //            let matches = regex.matches(in: email, range: NSRange(location: 0, length: email.utf16.count))
-    //            return !matches.isEmpty
-    //        } catch {
-    //            return false
-    //        }
-    //    }
 }

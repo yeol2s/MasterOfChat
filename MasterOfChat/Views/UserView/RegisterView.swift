@@ -60,18 +60,7 @@ struct RegisterView: View {
             } //:HSTACK
             
             Button {
-                vm.isChecked { result in
-                    switch result {
-                    case .success(let success):
-                        vm.alertType = success
-                        vm.showAlert.toggle()
-                        print("가입 성공")
-                        // TODO: sheet MainView
-                    case .failure(let error):
-                        vm.alertType = error
-                        vm.showAlert.toggle()
-                    }
-                }
+                vm.signUp()
             } label: {
                 Text("회원 가입")
             }

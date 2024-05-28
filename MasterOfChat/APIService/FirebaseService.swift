@@ -14,7 +14,7 @@ import Firebase
 protocol FirebaseServiceProtocol {
     //    func signIn(email: String, password: String, completion: @escaping (Result<LoginSuccess, LoginError>) -> Void)
     func signIn(email: String, password: String) async -> Result<LoginSuccess, LoginError>
-    func signUp(email: String, password: String, completion: @escaping (Bool) -> Void)
+    func signUp(email: String, password: String, confirmPW: String, completion: @escaping (Result<RegisterSuccess, RegisterError>) -> Void)
     func signOut()
     func loadMessage()
     func userAuthStatusCheck()
@@ -31,7 +31,7 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     // MARK: - Function
     
-    // async/await
+    // 로그인(async/await)
     func signIn(email: String, password: String) async -> Result<LoginSuccess, LoginError> {
         await withCheckedContinuation { continuation in
             Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
@@ -44,9 +44,28 @@ final class FirebaseService: FirebaseServiceProtocol {
         }
     }
     
-    
-    func signUp(email: String, password: String, completion: @escaping (Bool) -> Void) {
-        // TODO: AuthViewModel
+    // 회원가입
+    func signUp(email: String, password: String, confirmPW: String, completion: @escaping (Result<RegisterSuccess, RegisterError>) -> Void) {
+        // 이메일 형식 체크
+        guard isValidEmail(email) else {
+            completion(.failure(.notEmailFormat))
+            return }
+        // 패스워드 6자리 이상 체크
+        if password.count >= 6 {
+            if password == confirmPW {
+                Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+                    if let _ = error {
+                        completion(.failure(.authFailed))
+                    } else {
+                        completion(.success(.joinSuccess))
+                    }
+                }
+            } else {
+                completion(.failure(.notPasswordSame))
+            }
+        } else {
+            completion(.failure(.passwordLength))
+        }
     }
     
     func signOut() {

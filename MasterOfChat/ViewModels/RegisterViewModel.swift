@@ -45,27 +45,24 @@ final class RegisterViewModel: ObservableObject {
     
     // MARK: - Function
     
-    // MARK:  🖐️🖐️일단 이건 좀 다시 검토하자.
-    func isChecked(completion: @escaping (Result<RegisterSuccess, RegisterError>) -> Void) {
-        guard isValidEmail(registerID) else {
-            completion(.failure(.notEmailFormat))
-            return }
-        
-        if registerPW.count >= 6 { // 패스워드는 6자리 이상(Firebase에서 6자리 이상 요구)
-            if registerPW == confirmPW {
-                signUp { result in
-                    if result {
-                        completion(.success(.joinSuccess))
-                    } else {
-                        completion(.failure(.authFailed))
+    func signUp() {
+            firebaseService.signUp(email: registerID, password: registerPW, confirmPW: confirmPW) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let success):
+                    self.alertType = success
+                    // MARK: UI를 변경하므로 메인 스레드에서 처리
+                    DispatchQueue.main.async {
+                        self.showAlert.toggle()
+                    }
+                case .failure(let error):
+                    self.alertType = error
+                    DispatchQueue.main.async {
+                        self.showAlert.toggle()
                     }
                 }
-            } else {
-                completion(.failure(.notPasswordSame))
             }
-        } else {
-            completion(.failure(.passwordLength))
-        }
     }
     
     func getAlertValue(alert: AlertType) -> AlertValue {
@@ -97,18 +94,6 @@ final class RegisterViewModel: ObservableObject {
     }
     
     // MARK: - Private Function
-    
-    // (Firebase)계정 등록
-    private func signUp(completion: @escaping (Bool) -> Void) {
-        Auth.auth().createUser(withEmail: registerID, password: registerPW) { authResult, error in
-            if let error = error {
-                print("에러 발생:\(error.localizedDescription)")
-                completion(false)
-            } else {
-                completion(true)
-            }
-        }
-    }
     
     // 이메일 유효성 확인
     private func isValidEmail(_ email: String) -> Bool {
