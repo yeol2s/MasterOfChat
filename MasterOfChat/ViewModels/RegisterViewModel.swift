@@ -8,7 +8,6 @@
 // 회원가입
 
 import Foundation
-import Firebase
 
 // MARK: - Enum
 enum RegisterSuccess: AlertType { // 회원 가입 성공(Success)
