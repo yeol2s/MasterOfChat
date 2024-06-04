@@ -50,7 +50,7 @@ final class AuthViewModel: ObservableObject {
         }
     }
     
-    // FirebaseService 바인딩
+    // MARK: (Combine)FirebaseService 바인딩
     private func bindFirebaseService() {
         firebaseService.authStatePublisher
             .receive(on: DispatchQueue.main) // 메인스레드에서 값을 수신 처리

@@ -18,7 +18,8 @@ struct MainView: View {
             VStack(spacing: 2) {
                 // 채팅 뷰
                 List {
-                    Text("테스트 채팅")
+                    //Text("테스트 채팅")
+                    
                 } //:LIST
                 .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
                 .background(Color(K.AppColors.chatRoomColor))

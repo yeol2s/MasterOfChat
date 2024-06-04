@@ -18,10 +18,12 @@ protocol FirebaseServiceProtocol {
     func signUp(email: String, password: String, confirmPW: String, completion: @escaping (Result<RegisterSuccess, RegisterError>) -> Void)
     func signOut()
     func loadMessage()
+    func sendMessage(inText: String)
     func userAuthStatusCheck() -> Bool
-    // Publisher
+    // (Combine) 계정 인증상태 Publisher (Subject에 직접 접근하지 않음)
     var authStatePublisher: AnyPublisher<Bool, Never> { get }
-
+    // (Combine) Message Publisher (Subject에 직접 접근하지 않음)
+    var messageStatePublisher: AnyPublisher<[Message], Never> { get }
 }
 
 // MARK: - FireBaseService(싱글톤)
@@ -30,15 +32,29 @@ final class FirebaseService: FirebaseServiceProtocol {
     static let shared = FirebaseService() // 싱글톤
     private init() {} // 새로운 객체 생성 차단
     
-    lazy var currentUser: Firebase.User? = nil
+    // TODO: Combine 사용할 예정
+    private var messages: [Message] = []
+    
+    lazy var currentUser: Firebase.User? = nil // lazy
+    
+    // MARK: Auth Combine(PassthroughSubject)
     // Combine Publish 객체 생성(인증상태 변화를 외부로 Publish) -> AuthViewModel에서 구독
+    // PassthroughSubject : 초기값을 가지지 않는 새로운 값 퍼블리셔하는 Subject
     private let authStateSubject = PassthroughSubject<Bool, Never>() // Never는 에러를 발생시키지 않음(CPU 제어권을 넘기지 않음 -> 필요시에는 에러타입으로 변경)
     var authStatePublisher: AnyPublisher<Bool, Never> { // 계산속성으로
         authStateSubject.eraseToAnyPublisher() // AnyPublisher로 퉁침(구체적인 퍼블리셔 타입을 지우고 표준화된 AnyPublisher 타입으로 변환 - 구현 세부사항을 감추는 것)
         // send: 값 발행(publish), sink: 구독(subscribe), PassthroughSubject: 형식 지정(발행할 값의 형식과 에러 형식 지정)(퍼블리셔의 형태 -> 다른 형태가 올 수 있음 ex: CurrentValueSubject)
     }
     
-    // loadMessage
+    // MARK: Message Combine(CurrentValueSubject)
+    // TODO: 초기값을 가지는 퍼블리셔니까 메세지를 미리 넣어서 초기화 시킬 수 있는지 고려
+    private let messageStateSubject = CurrentValueSubject<[Message], Never>([])
+    var messageStatePublisher: AnyPublisher<[Message], Never> {
+        messageStateSubject.eraseToAnyPublisher()
+    }
+
+    
+    // Load, Send Message
     let db = Firestore.firestore() // FireStore 데이터베이스 참조 생성
     
     // MARK: - Function
@@ -53,8 +69,10 @@ final class FirebaseService: FirebaseServiceProtocol {
                 } else {
                     continuation.resume(returning: .success(.loginSuccess))
                 }
-                // TODO: Combine
-                //self.authStateSubject.send(authResult != nil)
+                // MARK: (Combine) 로그인되면 Alert 발생 후 로그인 화면으로 넘어감
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    self.authStateSubject.send(authResult != nil)
+                }
             }
         }
     }
@@ -74,7 +92,7 @@ final class FirebaseService: FirebaseServiceProtocol {
                     } else {
                         completion(.success(.joinSuccess))
                     }
-                    // TODO: Combine
+                    // 회원가입 완료되면 Alert 발생 후 리스너 호출되어 자동 로그인
                     //self.authStateSubject.send(authResult != nil)
                 }
             } else {
@@ -99,7 +117,50 @@ final class FirebaseService: FirebaseServiceProtocol {
     // 메세지 로드
     func loadMessage() {
         // TODO: ChatViewModel
-        
+        // addSnapshotListener로 실시간 업데이트 수신
+        db.collection(K.Firebase.collectionName)
+            .order(by: K.Firebase.dateField) // date기준 정렬
+            .addSnapshotListener { [weak self] (querySnapshot, error) in
+                guard let self = self else { return }
+                print("addSnapshotListener RUN")
+                self.messages = []
+                if let error = error {
+                    print("SnapshotError: \(error.localizedDescription)")
+                } else {
+                    if let snapshotDocuments = querySnapshot?.documents {
+                        for doc in snapshotDocuments { // 스냅샷을 반복하여 스캔
+                            print(doc.data())
+                            let data = doc.data() // data는 key-value 쌍 ["body": ~, "sender": a@abc.com]
+                            if let messageSender = data[K.Firebase.senderField] as? String,
+                               let meessageBody = data[K.Firebase.bodyField] as? String { // 타입캐스팅(Any? -> String)(data가 Any? 타입으로 들어옴)\
+                                // TODO: currentUSer Lazy하지 않게 파이어베이스 싱글톤 생성시 같이 초기화 시키는게 나을지 고려
+                                let newMessage = Message(sender: messageSender, body: meessageBody, isSentByCurrentUser: messageSender == Auth.auth().currentUser?.email ? true : false)
+                                self.messages.append(newMessage)
+                            }
+                        } // : SnapshotLoop
+                        self.messageStateSubject.send(messages) // Combine Send
+                    }
+                }
+            } // : SnapShotListener
+    }
+    
+    // 메세지 전송
+    func sendMessage(inText: String) {
+        // TODO: currentUSer Lazy하지 않게 파이어베이스 싱글톤 생성시 같이 초기화 시키는게 나을지 고려
+        if let messageSender = Auth.auth().currentUser?.email {
+            db.collection(K.Firebase.collectionName).addDocument(data: [
+                K.Firebase.senderField: messageSender,
+                K.Firebase.bodyField: inText,
+                K.Firebase.dateField: Date().timeIntervalSince1970 // 기준시간 1970.1.1 0시 ~ 현재까지 초 계산(생성시점)
+            ]) { (error) in
+                if let error {
+                    print("Firebase data save error : \(error)")
+                } else {
+                    print("Success data save")
+                    // 메세지가 정상적으로 들어갔으면 (데이터베이스가 변경되면서)db.collection에서 .addSnapshotListener가 비동기적으로 호출될 것(실시간 업데이트 반영)
+                }
+            }
+        }
     }
     
     // 삭제된 계정인지 확인(삭제된 계정이 로그인 되어있다면 로그아웃)
@@ -110,7 +171,7 @@ final class FirebaseService: FirebaseServiceProtocol {
         
         // Firebase Auth 상태 변화 감지하는 리스너(변할때마다 호출)
         // 리스너는 등록할때는 동기적으로, 인증 상태 변화가 있을때는 비동기적으로 호출
-        // MARK: Combine이 추가되어 리스너에서 로그인 상태에 따라 퍼블리셔에게 로그인 상태에 따른 결과를 send 하면서 구독자인 authViewModel의 로그인 상태값이 변경된다.
+        // MARK: (Combine)Combine이 추가되어 리스너에서 로그인 상태에 따라 퍼블리셔에게 로그인 상태에 따른 결과를 send 하면서 구독자인 authViewModel의 로그인 상태값이 변경된다.
         Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             guard let self = self else { return }
             print("Auth 상태 리스너 실행")
