@@ -17,12 +17,22 @@ struct MainView: View {
     var body: some View {
             VStack(spacing: 2) {
                 // 채팅 뷰
-                List {
-                    //Text("테스트 채팅")
-                    
-                } //:LIST
-                .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
-                .background(Color(K.AppColors.chatRoomColor))
+//                List(chatVm.messages) { message in
+//                    //Text("테스트 채팅")
+////                    ForEach(chatVm.messages) { message in
+////                        MessageCell(message: message)
+////                    }
+////                    MessageCell(message: message)
+////                        .listRowInsets(EdgeInsets()) // 여백 제거
+//
+//                } //:LIST
+//                .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
+//                .background(Color(K.AppColors.chatRoomColor))
+                ScrollView {
+                    ForEach(chatVm.messages) { message in
+                        MessageView(message: message)
+                    }
+                } // : ScrollView
                 
                 HStack {
                     TextEditor(text: $chatVm.chatText)
@@ -34,6 +44,7 @@ struct MainView: View {
                     
                     Button {
                         // TODO: Send
+                        chatVm.sendMessage()
                     } label: {
                         Image(systemName: "paperplane.fill")
                     }
@@ -48,7 +59,6 @@ struct MainView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
-                    // TODO: Logout
                     authVm.showAlert.toggle()
                 } label: {
                     Image(systemName: "power")

@@ -24,18 +24,27 @@ protocol FirebaseServiceProtocol {
     var authStatePublisher: AnyPublisher<Bool, Never> { get }
     // (Combine) Message Publisher (Subject에 직접 접근하지 않음)
     var messageStatePublisher: AnyPublisher<[Message], Never> { get }
+    
+    
+    // TODO: 임시 Documents remove
+    func deleteDocuments()
+    
 }
 
 // MARK: - FireBaseService(싱글톤)
 final class FirebaseService: FirebaseServiceProtocol {
     
+    // MARK: - Property
+    
     static let shared = FirebaseService() // 싱글톤
     private init() {} // 새로운 객체 생성 차단
+        
+    lazy var currentUser: Firebase.User? = nil // lazy
+    let db = Firestore.firestore() // FireStore 데이터베이스 참조 생성
     
-    // TODO: Combine 사용할 예정
     private var messages: [Message] = []
     
-    lazy var currentUser: Firebase.User? = nil // lazy
+    private var stateChangeListenerHandle: AuthStateDidChangeListenerHandle? // 리스너 핸들
     
     // MARK: Auth Combine(PassthroughSubject)
     // Combine Publish 객체 생성(인증상태 변화를 외부로 Publish) -> AuthViewModel에서 구독
@@ -52,10 +61,8 @@ final class FirebaseService: FirebaseServiceProtocol {
     var messageStatePublisher: AnyPublisher<[Message], Never> {
         messageStateSubject.eraseToAnyPublisher()
     }
-
     
-    // Load, Send Message
-    let db = Firestore.firestore() // FireStore 데이터베이스 참조 생성
+
     
     // MARK: - Function
     
@@ -107,8 +114,14 @@ final class FirebaseService: FirebaseServiceProtocol {
     func signOut() {
         do {
             try Auth.auth().signOut()
-            // TODO: Combine
+            // TODO: 여기선 Combine send 보류
             //authStateSubject.send(false)
+            
+            // 리스너 삭제
+            if let handle = stateChangeListenerHandle {
+                Auth.auth().removeStateDidChangeListener(handle)
+                stateChangeListenerHandle = nil
+            }
         } catch let signOutError as NSError {
             print("로그아웃 에러 : \(signOutError.localizedDescription)")
         }
@@ -138,9 +151,10 @@ final class FirebaseService: FirebaseServiceProtocol {
                                 self.messages.append(newMessage)
                             }
                         } // : SnapshotLoop
-                        self.messageStateSubject.send(messages) // Combine Send
                     }
                 }
+                print("loaded Messages: \(self.messages)")
+                self.messageStateSubject.send(messages) // Combine Send
             } // : SnapShotListener
     }
     
@@ -169,6 +183,12 @@ final class FirebaseService: FirebaseServiceProtocol {
         
         currentUser = Auth.auth().currentUser // (lazy)현재 로그인된 유저 상태(현재 로그인된 유저가 담김)
         
+        // (핸들)리스너가 비어있을때만 리스너 등록되도록
+        guard stateChangeListenerHandle == nil else {
+            return currentUser != nil
+        }
+        
+        // TODO: 리스너를 계속 추가하지 말고 이미 리스너가 추가되었는지 여부 확인하는 로직 구현해서 네트워크 요청 최소화 할 것
         // Firebase Auth 상태 변화 감지하는 리스너(변할때마다 호출)
         // 리스너는 등록할때는 동기적으로, 인증 상태 변화가 있을때는 비동기적으로 호출
         // MARK: (Combine)Combine이 추가되어 리스너에서 로그인 상태에 따라 퍼블리셔에게 로그인 상태에 따른 결과를 send 하면서 구독자인 authViewModel의 로그인 상태값이 변경된다.
@@ -186,10 +206,16 @@ final class FirebaseService: FirebaseServiceProtocol {
                 print("authListener: nil")
                 self.authStateSubject.send(false) // combine
             }
-        }
+        } // : Listener
         
         return currentUser != nil
     }
+    
+    // MARK: 임시 Documents Delete
+    func deleteDocuments() {
+        deleteAllDocuments()
+    }
+
     
     
     // MARK: - Private Function
@@ -220,6 +246,34 @@ final class FirebaseService: FirebaseServiceProtocol {
                 self.signOut()
             } else {
                 print("토큰 확인")
+            }
+        }
+    }
+    
+    // MARK: 임시 Documents Delete
+    private func deleteAllDocuments() {
+        let db = Firestore.firestore()
+        let collectionRef = db.collection(K.Firebase.collectionName)
+        
+        collectionRef.getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error getting documents: \(error.localizedDescription)")
+                return
+            }
+            
+            guard let documents = querySnapshot?.documents else {
+                print("No documents found")
+                return
+            }
+            
+            for document in documents {
+                document.reference.delete { error in
+                    if let error = error {
+                        print("Error deleting document \(document.documentID): \(error.localizedDescription)")
+                    } else {
+                        print("Document \(document.documentID) successfully deleted")
+                    }
+                }
             }
         }
     }

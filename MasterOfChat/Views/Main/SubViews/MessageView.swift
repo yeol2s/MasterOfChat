@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct MessageCell: View {
+struct MessageView: View {
     
     @State var message: Message
     
@@ -21,7 +21,7 @@ struct MessageCell: View {
                 Text(message.sender)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading, 10)
-                Text("message.body 들어갈 부분~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                Text(message.body)
                     .padding()
                     .background(message.isSentByCurrentUser ? Color.yellow.opacity(0.2) : Color.blue.opacity(0.3))
                     .cornerRadius(10)
@@ -38,5 +38,5 @@ struct MessageCell: View {
 }
 
 #Preview {
-    MessageCell(message: Message(sender: "a@abc.com", body: "임시", isSentByCurrentUser: false))
+    MessageView(message: Message(sender: "a@abc.com", body: "임시", isSentByCurrentUser: false))
 }

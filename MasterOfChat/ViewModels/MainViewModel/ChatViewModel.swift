@@ -23,6 +23,7 @@ final class ChatViewModel: ObservableObject  {
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
+//        firebaseService.deleteDocuments()
         bindFirebaseService()
         loadMessage()
     }
@@ -32,7 +33,8 @@ final class ChatViewModel: ObservableObject  {
     
     func sendMessage() {
         guard !chatText.isEmpty else { return }
-        firebaseService.sendMessage(inText: "테스트")
+        print(chatText)
+        firebaseService.sendMessage(inText: chatText)
     }
     
     
@@ -51,7 +53,8 @@ final class ChatViewModel: ObservableObject  {
             .sink { [weak self] message in
                 guard let self = self else { return }
                 self.messages = message
-                print(self.messages)
+                print("messageStatePublisher-1\(message)")
+                print("messageStatePublisher-2\(self.messages)")
             }
             .store(in: &cancellables)
     }
