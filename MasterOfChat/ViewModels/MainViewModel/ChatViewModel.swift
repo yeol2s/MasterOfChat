@@ -50,12 +50,16 @@ final class ChatViewModel: ObservableObject  {
     private func bindFirebaseService() {
         firebaseService.messageStatePublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] message in
-                guard let self = self else { return }
-                self.messages = message
-                print("messageStatePublisher-1\(message)")
-                print("messageStatePublisher-2\(self.messages)")
-            }
+        // MARK: (Old) .sink는 클로저를 통해 값을 처리하므로 추가적인 로직이 필요할때 사용
+//            .sink { [weak self] message in
+//                guard let self = self else { return }
+//                self.messages = message
+//                print("messageStatePublisher-1\(message)")
+//                print("messageStatePublisher-2\(self.messages)")
+//            }
+        // MARK: (New) .assign은 간단하게 값을 할당할 때 사용
+        // 현재 객체의 messages(키패스)에 값을 받는다.
+            .assign(to: \.messages, on: self)
             .store(in: &cancellables)
     }
 

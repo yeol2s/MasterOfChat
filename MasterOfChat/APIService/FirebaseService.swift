@@ -141,14 +141,26 @@ final class FirebaseService: FirebaseServiceProtocol {
                     print("SnapshotError: \(error.localizedDescription)")
                 } else {
                     if let snapshotDocuments = querySnapshot?.documents {
-                        for doc in snapshotDocuments { // 스냅샷을 반복하여 스캔
-                            print(doc.data())
-                            let data = doc.data() // data는 key-value 쌍 ["body": ~, "sender": a@abc.com]
-                            if let messageSender = data[K.Firebase.senderField] as? String,
-                               let meessageBody = data[K.Firebase.bodyField] as? String { // 타입캐스팅(Any? -> String)(data가 Any? 타입으로 들어옴)\
-                                // TODO: currentUSer Lazy하지 않게 파이어베이스 싱글톤 생성시 같이 초기화 시키는게 나을지 고려
-                                let newMessage = Message(sender: messageSender, body: meessageBody, isSentByCurrentUser: messageSender == Auth.auth().currentUser?.email ? true : false)
-                                self.messages.append(newMessage)
+                        // MARK: (Old)Codable 채택하지 않은 Decoding
+//                        for doc in snapshotDocuments { // 스냅샷을 반복하여 스캔
+//                            print(doc.data())
+//                            let data = doc.data() // data는 key-value 쌍 ["body": ~, "sender": a@abc.com]
+//                            if let messageSender = data[K.Firebase.senderField] as? String,
+//                               let meessageBody = data[K.Firebase.bodyField] as? String { // 타입캐스팅(Any? -> String)(data가 Any? 타입으로 들어옴)\
+//                                // TODO: currentUSer Lazy하지 않게 파이어베이스 싱글톤 생성시 같이 초기화 시키는게 나을지 고려
+//                                let newMessage = Message(sender: messageSender, body: meessageBody, isSentByCurrentUser: messageSender == Auth.auth().currentUser?.email ? true : false)
+//                                self.messages.append(newMessage)
+//                            }
+                        // MARK: (New)Codable 채택하여 Decoding
+                        for doc in snapshotDocuments {
+                            do {
+                                var message = try doc.data(as: Message.self) // 디코딩
+                                if let currentUserEmail = Auth.auth().currentUser?.email {
+                                    message.isSentByCurrentUser = (message.sender == currentUserEmail)
+                                }
+                                self.messages.append(message)
+                            } catch let error {
+                                print("Message Load 디코딩 에러 : \(error.localizedDescription)")
                             }
                         } // : SnapshotLoop
                     }
