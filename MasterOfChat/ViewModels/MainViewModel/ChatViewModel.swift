@@ -23,9 +23,8 @@ final class ChatViewModel: ObservableObject  {
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
-//        firebaseService.deleteDocuments()
+//        firebaseService.deleteDocuments() // 파이어베이스 데이터 삭제
         bindFirebaseService()
-        loadMessage()
     }
     
     
@@ -36,15 +35,14 @@ final class ChatViewModel: ObservableObject  {
         print(chatText)
         firebaseService.sendMessage(inText: chatText)
     }
-    
+
+    // FireBase 데이터베이스 데이터 로드
+    func loadMessage() {
+        firebaseService.loadMessage()
+    }
     
     
     // MARK: - Private Function
-    
-    // FireBase 데이터베이스 데이터 로드
-    private func loadMessage() {
-        firebaseService.loadMessage()
-    }
     
     // MARK: (Combine)FirebaseService 바인딩
     private func bindFirebaseService() {
@@ -62,5 +60,4 @@ final class ChatViewModel: ObservableObject  {
             .assign(to: \.messages, on: self)
             .store(in: &cancellables)
     }
-
 }

@@ -25,7 +25,6 @@ protocol FirebaseServiceProtocol {
     // (Combine) Message Publisher (Subject에 직접 접근하지 않음)
     var messageStatePublisher: AnyPublisher<[Message], Never> { get }
     
-    
     // TODO: 임시 Documents remove
     func deleteDocuments()
     
@@ -44,7 +43,9 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     private var messages: [Message] = []
     
-    private var stateChangeListenerHandle: AuthStateDidChangeListenerHandle? // 리스너 핸들
+    private var stateChangeListenerHandle: AuthStateDidChangeListenerHandle? // (addStateDidChangeListener)상태 감지 리스너 핸들
+    
+    private var messageListenerHandle: ListenerRegistration? // (addListener) 메세지 등록 리스너 핸들
     
     // MARK: Auth Combine(PassthroughSubject)
     // Combine Publish 객체 생성(인증상태 변화를 외부로 Publish) -> AuthViewModel에서 구독
@@ -70,14 +71,16 @@ final class FirebaseService: FirebaseServiceProtocol {
     func signIn(email: String, password: String) async -> Result<LoginSuccess, LoginError> {
         // withCheckedContinuation : 콜백 기반의 비동기 코드를 async/await 스타일로 변환할 때 사용(콜백기반의 비동기 작업을 async/awiate 스타일로 변환할 때 사용하는 유틸리티(비동기 작업의 완료를 기다리는 동안 현재 작업을 일시 중지하고, 작업이 완료되면 다시 실행)
         await withCheckedContinuation { continuation in
-            Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
+            Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
+                guard let self = self else { return }
                 if let _ = error {
                     continuation.resume(returning: .failure(.authError))
                 } else {
                     continuation.resume(returning: .success(.loginSuccess))
                 }
+                
                 // MARK: (Combine) 로그인되면 Alert 발생 후 로그인 화면으로 넘어감
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     self.authStateSubject.send(authResult != nil)
                 }
             }
@@ -114,10 +117,18 @@ final class FirebaseService: FirebaseServiceProtocol {
     func signOut() {
         do {
             try Auth.auth().signOut()
-            // TODO: 여기선 Combine send 보류
-            //authStateSubject.send(false)
+            authStateSubject.send(false)
+//            // 테스트
+            messages = [] // 메시지 초기화
+            currentUser = nil // 사용자 정보 초기화
+            messageStateSubject.send([]) // 메시지 퍼블리셔 초기화
+            print("로그아웃 되었습니다.")
             
-            // 리스너 삭제
+            // message 리스너 제거
+            messageListenerHandle?.remove()
+            messageListenerHandle = nil
+        
+            // 상태 리스너 제거
             if let handle = stateChangeListenerHandle {
                 Auth.auth().removeStateDidChangeListener(handle)
                 stateChangeListenerHandle = nil
@@ -129,9 +140,13 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     // 메세지 로드
     func loadMessage() {
+        
+        currentUser = Auth.auth().currentUser
+        print("loadMessage currentUser: \(currentUser?.email ?? "nil")")
+        
         // TODO: ChatViewModel
-        // addSnapshotListener로 실시간 업데이트 수신
-        db.collection(K.Firebase.collectionName)
+        // addSnapshotListener로 실시간 데이터 변경 사항 업데이트 수신
+        messageListenerHandle = db.collection(K.Firebase.collectionName)
             .order(by: K.Firebase.dateField) // date기준 정렬
             .addSnapshotListener { [weak self] (querySnapshot, error) in
                 guard let self = self else { return }
@@ -155,7 +170,7 @@ final class FirebaseService: FirebaseServiceProtocol {
                         for doc in snapshotDocuments {
                             do {
                                 var message = try doc.data(as: Message.self) // 디코딩
-                                if let currentUserEmail = Auth.auth().currentUser?.email {
+                                if let currentUserEmail = self.currentUser?.email {
                                     message.isSentByCurrentUser = (message.sender == currentUserEmail)
                                 }
                                 self.messages.append(message)
@@ -172,8 +187,7 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     // 메세지 전송
     func sendMessage(inText: String) {
-        // TODO: currentUSer Lazy하지 않게 파이어베이스 싱글톤 생성시 같이 초기화 시키는게 나을지 고려
-        if let messageSender = Auth.auth().currentUser?.email {
+        if let messageSender = currentUser?.email {
             db.collection(K.Firebase.collectionName).addDocument(data: [
                 K.Firebase.senderField: messageSender,
                 K.Firebase.bodyField: inText,
@@ -191,16 +205,14 @@ final class FirebaseService: FirebaseServiceProtocol {
     
     // 삭제된 계정인지 확인(삭제된 계정이 로그인 되어있다면 로그아웃)
     func userAuthStatusCheck() -> Bool {
-        // TODO: AuthViewModel
-        
-        currentUser = Auth.auth().currentUser // (lazy)현재 로그인된 유저 상태(현재 로그인된 유저가 담김)
         
         // (핸들)리스너가 비어있을때만 리스너 등록되도록
         guard stateChangeListenerHandle == nil else {
             return currentUser != nil
         }
         
-        // TODO: 리스너를 계속 추가하지 말고 이미 리스너가 추가되었는지 여부 확인하는 로직 구현해서 네트워크 요청 최소화 할 것
+        currentUser = Auth.auth().currentUser
+        
         // Firebase Auth 상태 변화 감지하는 리스너(변할때마다 호출)
         // 리스너는 등록할때는 동기적으로, 인증 상태 변화가 있을때는 비동기적으로 호출
         // MARK: (Combine)Combine이 추가되어 리스너에서 로그인 상태에 따라 퍼블리셔에게 로그인 상태에 따른 결과를 send 하면서 구독자인 authViewModel의 로그인 상태값이 변경된다.
@@ -289,5 +301,4 @@ final class FirebaseService: FirebaseServiceProtocol {
             }
         }
     }
-    
 }

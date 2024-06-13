@@ -10,21 +10,15 @@ import SwiftUI
 
 struct MainView: View {
     // MARK: - Property
-    @StateObject var authVm = AuthViewModel() // 인증 뷰모델
     @StateObject var chatVm = ChatViewModel() // 채팅 뷰모델
+    @StateObject var authVm = AuthViewModel() // 인증 뷰모델
     
     // MARK: - View
     var body: some View {
+        
         VStack(spacing: 2) {
-            // 채팅 뷰
-            // MARK: (Old)List - 셀 재사용으로 메모리 관리는 좋으나 커스터마이징이 힘듦
-            //            List(chatVm.messages) { message in
-            //                MessageView(message: message)
-            //            } //:LIST
-            //            .scrollContentBackground(.hidden) // List 백그라운드 컬러 설정
-            //            .background(Color(K.AppColors.chatRoomColor))
             
-            // MARK: (New)ScrollView - 셀 재사용은 없지만 LazyVStack으로 필요한 부분만 로드하여 어느정도 커버 가능하고(매우 큰 데이터 처리는 불리) 커스터마이징이 유연하여 스크롤뷰 채택
+            // MARK: ScrollView - 셀 재사용은 없지만 LazyVStack으로 필요한 부분만 로드하여 어느정도 커버 가능하고(매우 큰 데이터 처리는 불리) 커스터마이징이 유연하여 스크롤뷰 채택
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack {
@@ -41,6 +35,8 @@ struct MainView: View {
                     }
                 } // : ScrollView
             } // : ScrollViewReader
+            
+            
             
             HStack {
                 TextEditor(text: $chatVm.chatText)
@@ -60,7 +56,7 @@ struct MainView: View {
             } //:HSTACK
             .background(Color(K.AppColors.chatRoomColor).opacity(0.5))
         } //:VSTACK
-        .fullScreenCover(isPresented: $authVm.isloginViewSheet) { //sheet(로그인 안되어있을시 로그인뷰)
+        .fullScreenCover(isPresented: $authVm.isUserLoggedIn.not) { //sheet(로그인 안되어있을시 로그인뷰)
             LoginView(authVm: authVm)
         }
         .navigationBarTitle("채팅방", displayMode: .inline)
@@ -78,7 +74,25 @@ struct MainView: View {
                 }
             }
         }
+        // MARK: 로그인 상태에 따른 (firebaseService)로드메세지 호출
+        // 로그인이 되어있지 않은 상태에서 앱 실행시 로드메시지 호출되지 않고 로그인이 되어있을때 로드메세지 호출하여 메세지 로드하도록
+        .onAppear {
+            if authVm.isUserLoggedIn {
+                print("MainView onAppear RUN")
+                chatVm.loadMessage()
+            }
+        }
+        .onChange(of: authVm.isUserLoggedIn) { isLoggedIn in
+            if isLoggedIn {
+                print("MainView onChange RUN")
+                chatVm.loadMessage()
+            } else {
+                print("ChatVm messages remove")
+                chatVm.messages.removeAll()
+            }
+        }
     }
+    
     
     // MARK: - Function
     private func getAlert() -> Alert {
@@ -98,3 +112,15 @@ struct MainView: View {
 //        MainView()
 //    }
 //}
+
+// MARK: - Extension
+// Binding 확장 - LoginView .sheet 바인딩 값으로 isUserLoggedIn 변수의 Bool값 not 사용 위함
+extension Binding where Value == Bool { // Binding<Bool> 타입만 확장 적용되도록 where절 선언
+    var not: Binding<Bool> {
+        Binding<Bool>(
+            get: { !self.wrappedValue },
+            set: { self.wrappedValue = !$0 }
+        )
+    }
+}
+

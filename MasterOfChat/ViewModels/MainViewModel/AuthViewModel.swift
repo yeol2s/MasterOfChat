@@ -13,7 +13,9 @@ import Combine
 final class AuthViewModel: ObservableObject {
     // MARK: - Property
 
-    @Published var isloginViewSheet: Bool = false
+    //@Published var isloginViewSheet: Bool = false
+    @Published var isUserLoggedIn: Bool = false // 로그인 상태 변경 감지
+    
     
     @Published var showAlert: Bool = false
     
@@ -24,7 +26,7 @@ final class AuthViewModel: ObservableObject {
     // 싱글톤으로 FirebaseSerivce 주입
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
-        setupFirebaseAuth()
+        setupFirebaseAuth() // 삭제된 계정 확인 및 addStateDidChangeListener 등록
         bindFirebaseService()
     }
     
@@ -42,11 +44,9 @@ final class AuthViewModel: ObservableObject {
     private func setupFirebaseAuth() {
         // 로그인 상태에서 콘솔에서 계정 삭제가 되는 경우 앱 다시 실행시 Firebase에서 ID Token을 확인하여 로그아웃 처리하고 리스너에서 변화된 값을 감지해서 currentUser를 nil 처리 -> 로그인 화면 sheet
         if firebaseService.userAuthStatusCheck() {
-            print("isloginViewSheet = false")
-            isloginViewSheet = false
+            isUserLoggedIn = true
         } else {
-            print("isloginViewSheet = true")
-            isloginViewSheet = true // 로그인 화면 .sheet
+            isUserLoggedIn = false
         }
     }
     
@@ -56,7 +56,7 @@ final class AuthViewModel: ObservableObject {
             .receive(on: DispatchQueue.main) // 메인스레드에서 값을 수신 처리
             .sink { [weak self] isLoggedIn in // 구독
                 guard let self = self else { return }
-                self.isloginViewSheet = !isLoggedIn // Publisher로 부터 send를 받아서 할당하여 로그인 상태 변경
+                self.isUserLoggedIn = isLoggedIn // Publisher로 부터 send를 받아서 할당하여 로그인 상태 변경
             }
         // .store: Subscription을 저장하고 관리
         // AnyCancellable에 넣어주므로 메모리에서 사라질 때 구독도 같이 취소되도록 하여 메모리 누수를 방지.

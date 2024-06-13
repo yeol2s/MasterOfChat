@@ -122,11 +122,10 @@ struct LoginView: View {
     
     // MARK: - Function
     
-    // TODO: authVm.isloginViewSheet = false
     private func sheetStatusChange() {
         if let alertType = vm.alertType {
             if alertType is LoginSuccess {
-                authVm.isloginViewSheet = false // 로그인 성공시 .sheet닫음
+                authVm.isUserLoggedIn = true // 로그인 성공시 .sheet닫음
             }
         }
     }
