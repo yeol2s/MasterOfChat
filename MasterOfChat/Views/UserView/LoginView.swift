@@ -137,7 +137,9 @@ struct LoginView: View {
         return Alert(
             title: Text(alertValue.title),
             message: Text(alertValue.message),
-            dismissButton: .default(Text("확인"))
+            dismissButton: .default(Text("확인")) {
+                vm.showAlert = false
+            }
         )
     }
     

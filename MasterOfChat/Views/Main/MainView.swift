@@ -39,7 +39,7 @@ struct MainView: View {
             
             
             HStack {
-                TextEditor(text: $chatVm.chatText)
+                TextEditor(text: $chatVm.chatText) // 긴 문장 동적으로 조절되기 수월하게 TextEditor 사용
                     .frame(minHeight: 50, maxHeight: 150)
                     .fixedSize(horizontal: false, vertical: /*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/) // 텍스트에디터 높이 동적 크기 조절
                     .background(Color.clear)
@@ -47,8 +47,8 @@ struct MainView: View {
                     .padding(5)
                 
                 Button {
-                    // TODO: Send
                     chatVm.sendMessage()
+                    chatVm.chatText = ""
                 } label: {
                     Image(systemName: "paperplane.fill")
                 }

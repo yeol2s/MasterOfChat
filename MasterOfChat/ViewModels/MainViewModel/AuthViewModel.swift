@@ -42,12 +42,9 @@ final class AuthViewModel: ObservableObject {
     
     // Firebase Setup(등록사용자 및 로그인 상태 확인)
     private func setupFirebaseAuth() {
+        
         // 로그인 상태에서 콘솔에서 계정 삭제가 되는 경우 앱 다시 실행시 Firebase에서 ID Token을 확인하여 로그아웃 처리하고 리스너에서 변화된 값을 감지해서 currentUser를 nil 처리 -> 로그인 화면 sheet
-        if firebaseService.userAuthStatusCheck() {
-            isUserLoggedIn = true
-        } else {
-            isUserLoggedIn = false
-        }
+        firebaseService.userAuthStatusCheck()
     }
     
     // MARK: (Combine)FirebaseService 바인딩

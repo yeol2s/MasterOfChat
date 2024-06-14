@@ -19,7 +19,7 @@ protocol FirebaseServiceProtocol {
     func signOut()
     func loadMessage()
     func sendMessage(inText: String)
-    func userAuthStatusCheck() -> Bool
+    func userAuthStatusCheck()
     // (Combine) 계정 인증상태 Publisher (Subject에 직접 접근하지 않음)
     var authStatePublisher: AnyPublisher<Bool, Never> { get }
     // (Combine) Message Publisher (Subject에 직접 접근하지 않음)
@@ -118,17 +118,21 @@ final class FirebaseService: FirebaseServiceProtocol {
         do {
             try Auth.auth().signOut()
             authStateSubject.send(false)
-//            // 테스트
+            
             messages = [] // 메시지 초기화
             currentUser = nil // 사용자 정보 초기화
             messageStateSubject.send([]) // 메시지 퍼블리셔 초기화
             print("로그아웃 되었습니다.")
             
+            // MARK: 리스너 메모리에서 제거
+            
             // message 리스너 제거
+            print("messageListener State(before): \(messageListenerHandle)")
             messageListenerHandle?.remove()
             messageListenerHandle = nil
+            print("messageListener State(After): \(messageListenerHandle)")
         
-            // 상태 리스너 제거
+            // 인증 상태 리스너 제거
             if let handle = stateChangeListenerHandle {
                 Auth.auth().removeStateDidChangeListener(handle)
                 stateChangeListenerHandle = nil
@@ -175,7 +179,7 @@ final class FirebaseService: FirebaseServiceProtocol {
                                 }
                                 self.messages.append(message)
                             } catch let error {
-                                print("Message Load 디코딩 에러 : \(error.localizedDescription)")
+                                print("Message Load Decoding 에러 : \(error.localizedDescription)")
                             }
                         } // : SnapshotLoop
                     }
@@ -204,12 +208,10 @@ final class FirebaseService: FirebaseServiceProtocol {
     }
     
     // 삭제된 계정인지 확인(삭제된 계정이 로그인 되어있다면 로그아웃)
-    func userAuthStatusCheck() -> Bool {
+    func userAuthStatusCheck() {
         
         // (핸들)리스너가 비어있을때만 리스너 등록되도록
-        guard stateChangeListenerHandle == nil else {
-            return currentUser != nil
-        }
+        guard stateChangeListenerHandle == nil else { return }
         
         currentUser = Auth.auth().currentUser
         
@@ -231,8 +233,6 @@ final class FirebaseService: FirebaseServiceProtocol {
                 self.authStateSubject.send(false) // combine
             }
         } // : Listener
-        
-        return currentUser != nil
     }
     
     // MARK: 임시 Documents Delete
