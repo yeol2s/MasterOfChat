@@ -14,7 +14,7 @@ final class AuthViewModel: ObservableObject {
     // MARK: - Property
 
     //@Published var isloginViewSheet: Bool = false
-    @Published var isUserLoggedIn: Bool = false // 로그인 상태 변경 감지
+    @Published var isUserLoggedIn: Bool = true // 로그인 상태 변경 감지
     
     
     @Published var showAlert: Bool = false
