@@ -63,6 +63,18 @@ struct MainView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    chatVm.showAlert.toggle()
+                } label: {
+                    Image(systemName: "trash")
+                        .font(.title3)
+                }
+                .alert(isPresented: $chatVm.showAlert) {
+                    getAlert("delete")
+                }
+            }
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
                     authVm.showAlert.toggle()
                 } label: {
                     Image(systemName: "power")
@@ -70,7 +82,7 @@ struct MainView: View {
                         .tint(.green)
                 }
                 .alert(isPresented: $authVm.showAlert) {
-                    getAlert()
+                    getAlert("logout")
                 }
             }
         }
@@ -95,23 +107,39 @@ struct MainView: View {
     
     
     // MARK: - Function
-    private func getAlert() -> Alert {
+    private func getAlert(_ alert: String) -> Alert {
+        
+        var message: String
+        
+        switch alert {
+        case "logout":
+            message = "로그아웃 하시겠습니까?"
+        case "delete":
+            message = "모든 메세지가 삭제됩니다."
+        default:
+            message = "알 수 없는 메세지"
+        }
+        
         return Alert(
             title: Text("알림"),
-            message: Text("로그아웃 하시겠습니까?"),
+            message: Text(message),
             primaryButton: .destructive(Text("확인"), action: {
-                authVm.signOut()
+                if message == "logut" {
+                    authVm.signOut()
+                } else {
+                    chatVm.deleteMessage()
+                }
             }),
             secondaryButton: .cancel(Text("취소"))
         )}
 }
 
 
-//#Preview {
-//    NavigationView {
-//        MainView()
-//    }
-//}
+#Preview {
+    NavigationView {
+        MainView()
+    }
+}
 
 // MARK: - Extension
 // Binding 확장 - LoginView .sheet 바인딩 값으로 isUserLoggedIn 변수의 Bool값 not 사용 위함

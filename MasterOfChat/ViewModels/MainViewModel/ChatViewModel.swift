@@ -17,13 +17,14 @@ final class ChatViewModel: ObservableObject  {
     
     @Published var chatText: String = ""
     
+    @Published var showAlert: Bool = false
+    
     private let firebaseService: FirebaseServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - init
     init(firebaseService: FirebaseServiceProtocol = FirebaseService.shared) {
         self.firebaseService = firebaseService
-//        firebaseService.deleteDocuments() // 파이어베이스 데이터 삭제
         bindFirebaseService()
     }
     
@@ -36,9 +37,14 @@ final class ChatViewModel: ObservableObject  {
         firebaseService.sendMessage(inText: chatText)
     }
 
-    // FireBase 데이터베이스 데이터 로드
+    // FireBase DB 로드
     func loadMessage() {
         firebaseService.loadMessage()
+    }
+    
+    // Firebase DB 삭제
+    func deleteMessage() {
+        firebaseService.deleteDocuments()
     }
     
     

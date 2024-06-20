@@ -11,7 +11,7 @@ import SwiftUI
 struct LoginView: View {
     
     // MARK: - Property
-    @StateObject var vm: LoginViewModel = LoginViewModel()
+    @StateObject var loginVm: LoginViewModel = LoginViewModel()
 
     @ObservedObject var authVm: AuthViewModel // 인증 뷰모델
     
@@ -32,12 +32,12 @@ struct LoginView: View {
                         
                         // (Binding) 사용자 정의 바인딩(옵셔널이라)
                         TextField("이메일 형식의 아이디를 입력하세요", text: Binding(
-                            get: { vm.loginID ?? ""},
-                            set: { vm.loginID = $0.isEmpty ? nil : $0}))
+                            get: { loginVm.loginID ?? ""},
+                            set: { loginVm.loginID = $0.isEmpty ? nil : $0}))
                         .textFieldStyle(.roundedBorder)
                         .font(.headline)
-                        .onReceive(vm.$loginID) { id in
-                            vm.inputStatus(loginID: id ?? "")
+                        .onReceive(loginVm.$loginID) { id in
+                            loginVm.inputStatus(loginID: id ?? "")
                         }
                     } //:HSTACK
                     .padding(.bottom)
@@ -48,13 +48,13 @@ struct LoginView: View {
                             .frame(width:60, height: 40)
                         
                         SecureField("패스워드를 입력하세요", text: Binding(
-                            get: { vm.loginPW ?? ""},
-                            set: { vm.loginPW = $0.isEmpty ? nil : $0}))
+                            get: { loginVm.loginPW ?? ""},
+                            set: { loginVm.loginPW = $0.isEmpty ? nil : $0}))
                         .textFieldStyle(.roundedBorder)
                         // 텍스트필드 입력마다 호출
-                        .onReceive(vm.$loginPW) { passWord in
+                        .onReceive(loginVm.$loginPW) { passWord in
                             // id, pw 입력 되었는지 확인 메서드 호출
-                            vm.inputStatus(loginPW: passWord ?? "")
+                            loginVm.inputStatus(loginPW: passWord ?? "")
                         }
                     } //:HSTACK
                     .padding(.bottom)
@@ -68,14 +68,14 @@ struct LoginView: View {
                             // SwiftUI의 Button은 동기적으로 동작하므로 비동기 작업을 실행하려면 Task를 명시적으로 사용해야 함.
                             // 버튼을 탭했을 때 비동기 작업이 시작되고, 완료될 때까지 다른 작업이 차단되지 않는다.(안전하게 비동기 함수 호출)
                             Task {
-                                await vm.signIn()
+                                await loginVm.signIn()
                                 sheetStatusChange()
                             }
                         } label: {
                             Text("로그인")
                         }
-                        .alert(isPresented: $vm.showAlert) {
-                            if let alert = vm.alertType {
+                        .alert(isPresented: $loginVm.showAlert) {
+                            if let alert = loginVm.alertType {
                                 getAlert(alert: alert)
                             } else {
                                 getAlert("로그인 실패")
@@ -85,7 +85,7 @@ struct LoginView: View {
                         .background(Color(K.AppColors.loginBtnColor).cornerRadius(10).shadow(radius: 2))
                         .foregroundColor(.white)
                         .font(.title.bold())
-                        .disabled(!vm.isInputValid)
+                        .disabled(!loginVm.isInputValid)
                         
                         Button {
                             // TODO: Login cancel logic
@@ -123,7 +123,7 @@ struct LoginView: View {
     // MARK: - Function
     
     private func sheetStatusChange() {
-        if let alertType = vm.alertType {
+        if let alertType = loginVm.alertType {
             if alertType is LoginSuccess {
                 authVm.isUserLoggedIn = true // 로그인 성공시 .sheet닫음
             }
@@ -132,13 +132,13 @@ struct LoginView: View {
     
     private func getAlert(alert: AlertType) -> Alert {
         print("getAlert")
-        let alertValue = vm.getAlertValue(alert: alert)
+        let alertValue = loginVm.getAlertValue(alert: alert)
         
         return Alert(
             title: Text(alertValue.title),
             message: Text(alertValue.message),
             dismissButton: .default(Text("확인")) {
-                vm.showAlert = false
+                loginVm.showAlert = false
             }
         )
     }

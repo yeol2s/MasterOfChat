@@ -79,8 +79,8 @@ final class FirebaseService: FirebaseServiceProtocol {
                     continuation.resume(returning: .success(.loginSuccess))
                 }
                 
-                // MARK: (Combine) 로그인되면 Alert 발생 후 로그인 화면으로 넘어감
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                // MARK: (Combine) 로그인되면 Alert 발생 후 로그인 화면으로 넘어감(1.5초 딜레이)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     self.authStateSubject.send(authResult != nil)
                 }
             }
