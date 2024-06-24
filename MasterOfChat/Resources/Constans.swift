@@ -23,4 +23,9 @@ struct K {
         static let bodyField = "body"
         static let dateField = "date"
     }
+    
+    struct AlertCase {
+        static let userLogout = "logout"
+        static let messageDelete = "delete"
+    }
 }

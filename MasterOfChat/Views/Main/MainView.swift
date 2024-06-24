@@ -69,7 +69,7 @@ struct MainView: View {
                         .font(.title3)
                 }
                 .alert(isPresented: $chatVm.showAlert) {
-                    getAlert("delete")
+                    getAlert(K.AlertCase.messageDelete)
                 }
             }
             
@@ -82,7 +82,7 @@ struct MainView: View {
                         .tint(.green)
                 }
                 .alert(isPresented: $authVm.showAlert) {
-                    getAlert("logout")
+                    getAlert(K.AlertCase.userLogout)
                 }
             }
         }
@@ -112,9 +112,9 @@ struct MainView: View {
         var message: String
         
         switch alert {
-        case "logout":
+        case K.AlertCase.userLogout:
             message = "로그아웃 하시겠습니까?"
-        case "delete":
+        case K.AlertCase.messageDelete:
             message = "모든 메세지가 삭제됩니다."
         default:
             message = "알 수 없는 메세지"
@@ -124,7 +124,7 @@ struct MainView: View {
             title: Text("알림"),
             message: Text(message),
             primaryButton: .destructive(Text("확인"), action: {
-                if message == "logut" {
+                if alert == K.AlertCase.userLogout {
                     authVm.signOut()
                 } else {
                     chatVm.deleteMessage()
